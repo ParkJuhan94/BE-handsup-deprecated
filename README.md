@@ -1,3 +1,5 @@
+[![CI Backend](https://github.com/ParkJuhan94/BE-handsup/actions/workflows/ci.yml/badge.svg)](https://github.com/ParkJuhan94/BE-handsup/actions/workflows/ci.yml)
+
 <h3 align="center">
   <img width="1600" src="https://github.com/Programmers-HandsUp/BE-handsup/assets/77109954/8f131580-df1d-41a4-9f78-7dc5dbf623ea"/>
 </h3>
