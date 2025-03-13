@@ -6,6 +6,12 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 10
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    topic:
+      name: handsup-topic
+
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.orm.jdbc.bind: trace
