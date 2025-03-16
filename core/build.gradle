@@ -43,6 +43,9 @@ dependencies {
 
     // FCM 알림
     implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 // Querydsl

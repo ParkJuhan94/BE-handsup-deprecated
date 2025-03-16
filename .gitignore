@@ -36,10 +36,13 @@ out/
 ### VS Code ###
 .vscode/
 .DS_Store
-core/src/main/resources/application-core-dev.yml
-core/src/main/resources/application-core-prod.yml
-/api/src/main/resources/application.yml
+api/src/main/resources/application.yml
+api/src/main/resources/application-local.yml
+core/src/main/resources/application-core-local.yml
 /core/src/main/generated/
+.env
+
+# FCM
 /core/src/main/resources/firebase/firebase_account.json
 /core/src/test/resources/firebase/firebase_account.json
 /api/src/test/resources/firebase/firebase_account.json
