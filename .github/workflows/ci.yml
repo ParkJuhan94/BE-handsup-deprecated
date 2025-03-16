@@ -71,6 +71,7 @@ jobs:
         run: |
           mkdir -p ./core/src/main/resources/firebase
           printf '%s' "${{ secrets.FIREBASE_ACCOUNT }}" > ./core/src/main/resources/firebase/firebase_account.json
+          cat ./core/src/main/resources/firebase/firebase_account.json
           mkdir -p ./core/src/test/resources/firebase
           printf '%s' "${{ secrets.FIREBASE_ACCOUNT }}" > ./core/src/test/resources/firebase/firebase_account.json
           mkdir -p ./api/src/test/resources/firebase
