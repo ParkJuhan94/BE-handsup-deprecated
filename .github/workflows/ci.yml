@@ -47,8 +47,6 @@ jobs:
           KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
         ports:
           - 9092:9092
-        depends_on:
-          - zookeeper
 
     env:
       TZ: 'Asia/Seoul'
