@@ -67,14 +67,14 @@ jobs:
           distribution: 'temurin'
 
       # firebase json 파일 생성
-      - name : Generate firebase_account.json
+      - name: Generate firebase_account.json
         run: |
           mkdir -p ./core/src/main/resources/firebase
-          echo "${{ secrets.FIREBASE_ACCOUNT }}" > ./core/src/main/resources/firebase/firebase_account.json
+          printf '%s' "${{ secrets.FIREBASE_ACCOUNT }}" > ./core/src/main/resources/firebase/firebase_account.json
           mkdir -p ./core/src/test/resources/firebase
-          echo "${{ secrets.FIREBASE_ACCOUNT }}" > ./core/src/test/resources/firebase/firebase_account.json
+          printf '%s' "${{ secrets.FIREBASE_ACCOUNT }}" > ./core/src/test/resources/firebase/firebase_account.json
           mkdir -p ./api/src/test/resources/firebase
-          echo "${{ secrets.FIREBASE_ACCOUNT }}" > ./api/src/test/resources/firebase/firebase_account.json
+          printf '%s' "${{ secrets.FIREBASE_ACCOUNT }}" > ./api/src/test/resources/firebase/firebase_account.json
 
       # gradle 권한 부여
       - name: Grant execute permission for gradlew
