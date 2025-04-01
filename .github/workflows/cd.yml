@@ -75,9 +75,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           password: ${{ secrets.EC2_PASSWORD }}
           port: ${{ secrets.EC2_PORT }}
-          script: |
-            cd compose
-            docker rm -f $(docker ps -qa)
+          script: |                        
+            mkdir -p ~/compose
+            cd ~/compose
+            docker-compose down
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_APP_NAME }} 
             docker-compose up -d
             docker system prune -f
