@@ -2,14 +2,12 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: hands-up-zookeeper
-    platform: linux/amd64
     ports:
       - "2181:2181"
 
   kafka:
     image: wurstmeister/kafka
     container_name: hands-up-kafka
-    platform: linux/amd64
     ports:
       - "9092:9092"
     environment:
@@ -22,9 +20,8 @@ services:
       - zookeeper
 
   redis:
-    image: redis
+    image: redis:latest
     container_name: hands-up-redis
-    platform: linux/arm64
     ports:
       - "6379:6379"
     volumes:
@@ -36,12 +33,10 @@ services:
     image: mysql:8.0
     container_name: hands-up-mysql
     environment:
-#      MYSQL_USER: ${MYSQL_USER}
-#      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     restart: always
@@ -53,9 +48,10 @@ services:
       start_period: 20s
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USERNAME}/${DOCKERHUB_APP_NAME}:latest
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
     container_name: hands-up-app
     ports:
       - "8080:8080"
