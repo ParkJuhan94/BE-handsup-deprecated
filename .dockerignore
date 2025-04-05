@@ -1,0 +1,12 @@
+# 모든 파일을 기본적으로 무시
+**
+
+# api 디렉토리와 그 하위 디렉토리는 예외 처리
+!api/
+!api/build/
+!api/build/libs/
+
+# 필요한 파일만 재포함
+!api/build/libs/api-0.0.1-SNAPSHOT.jar
+!entrypoint.sh
+!wait-for-it.sh
