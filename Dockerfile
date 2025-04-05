@@ -1,9 +1,3 @@
-# 빌드 단계
-FROM gradle:7.5-jdk17 AS build
-WORKDIR /app
-COPY . .
-RUN gradle clean build --no-daemon
-
 # 실행 단계
 FROM openjdk:17-jdk-slim
 WORKDIR /app
