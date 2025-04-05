@@ -20,7 +20,7 @@ services:
       - zookeeper
 
   redis:
-    image: redis
+    image: redis:latest
     container_name: hands-up-redis
     ports:
       - "6379:6379"
@@ -36,7 +36,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     restart: always
