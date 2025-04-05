@@ -1,4 +1,4 @@
-name: CD Backend
+name: 📌 CD Backend
 
 on:
   push:
@@ -25,8 +25,11 @@ jobs:
       # 3. application.yml 생성
       - name: Generate application.yml
         run: |
-          mkdir -p ./core/src/main/resources
-          echo "${{ secrets.APPLICATION_CORE }}" | base64 -d > ./core/src/main/resources/application-core.yml
+          mkdir -p ./api/src/main/resources                     
+          mkdir -p ./core/src/main/resources                   
+          echo "${{ secrets.APPLICATION_YML }}" | base64 -d > ./api/src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_LOCAL_YML }}" | base64 -d > ./api/src/main/resources/application-local.yml
+          echo "${{ secrets.APPLICATION_CORE_LOCAL_YML }}" | base64 -d > ./core/src/main/resources/application-core-local.yml          
 
       # 4. firebase_account.json 생성
       - name : Generate firebase_account.json
