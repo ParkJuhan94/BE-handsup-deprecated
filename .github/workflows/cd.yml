@@ -70,7 +70,22 @@ jobs:
           docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_APP_NAME }} .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_APP_NAME }}
 
-      # 서버 백그라운드 실행
+      # 10. .env 파일 생성 (.gitignore 처리된 파일)
+      - name: Generate .env file
+        run: echo "${{ secrets.ENV_CONTENT }}" > .env
+
+      # 11. EC2 서버로 Dockerfile, docker-compose.yml, .env 파일 복사
+      - name: Copy files to EC2 for docker-compose
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          port: ${{ secrets.EC2_PORT }}
+          source: "Dockerfile,docker-compose.yml,.env"
+          target: "~/compose/"
+
+      # 12. EC2에서 컨테이너 배포 및 실행
       - name: pull image and run container
         uses: appleboy/ssh-action@master
         with:
