@@ -48,9 +48,10 @@ services:
       start_period: 20s
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USERNAME}/${DOCKERHUB_APP_NAME}:latest
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
     container_name: hands-up-app
     ports:
       - "8080:8080"
