@@ -1,24 +1,30 @@
 dependencies {
+    // --- Core 모듈 ---
     implementation project(path: ':core')
     testImplementation(testFixtures(project(':core')))
 
+    // --- Spring Boot Starters ---
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
-    //swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-    // FCM 알림
-    implementation 'com.google.firebase:firebase-admin:9.2.0'
-    // 로컬 캐시
     implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
-    tasks.named('bootJar') {
-        enabled = true
-    }
+    // --- Swagger (OpenAPI) ---
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 
-    tasks.named('jar') {
-        enabled = true
-    }
+    // --- FCM (Firebase) ---
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+    // --- Local Cache (Caffeine) ---
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+}
+
+// --- 빌드 설정 ---
+tasks.named('bootJar') {
+    enabled = true
+}
+
+tasks.named('jar') {
+    enabled = true
 }
