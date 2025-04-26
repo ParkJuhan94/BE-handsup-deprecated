@@ -1,6 +1,6 @@
 package dev.handsup.common.config;
 
-import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import java.util.List;
 
@@ -17,41 +17,41 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @OpenAPIDefinition(
-	info = @Info(
-		title = "Hands-Up API",
-		description = "경매 중고 거래 API 명세서",
-		version = "v.0.1"),
-	servers = {
-		@Server(url = "https://handssup.shop", description = "Default Server URL"),
-		@Server(url = "http://localhost:8080")
-	}
+    info = @Info(
+        title = "Hands-Up API",
+        description = "경매 중고 거래 API 명세서",
+        version = "v.0.1"),
+    servers = {
+        @Server(url = "http://localhost:8080", description = "Default Server URL")
+    }
 )
+
 @Configuration
 public class SwaggerConfig {
 
-	@Bean
-	public OpenAPI openAPI() {
-		SecurityScheme securityScheme = new SecurityScheme()
-			.type(SecurityScheme.Type.HTTP)
-			.scheme("bearer")
-			.bearerFormat("JWT")
-			.in(SecurityScheme.In.HEADER)
-			.name(AUTHORIZATION);
+    @Bean
+    public OpenAPI openAPI() {
+        SecurityScheme securityScheme = new SecurityScheme()
+            .type(SecurityScheme.Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT")
+            .in(SecurityScheme.In.HEADER)
+            .name(AUTHORIZATION);
 
-		SecurityRequirement securityRequirement = new SecurityRequirement().addList(AUTHORIZATION);
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList(AUTHORIZATION);
 
-		return new OpenAPI()
-			.components(new Components().addSecuritySchemes(AUTHORIZATION, securityScheme))
-			.security(List.of(securityRequirement));
-	}
+        return new OpenAPI()
+            .components(new Components().addSecuritySchemes(AUTHORIZATION, securityScheme))
+            .security(List.of(securityRequirement));
+    }
 
-	@Bean
-	public GroupedOpenApi chatOpenApi() {
-		String[] paths = {"/api/**"};
+    @Bean
+    public GroupedOpenApi chatOpenApi() {
+        String[] paths = {"/api/**"};
 
-		return GroupedOpenApi.builder()
-			.group("API v.0.1")
-			.pathsToMatch(paths)
-			.build();
-	}
+        return GroupedOpenApi.builder()
+            .group("API v.0.1")
+            .pathsToMatch(paths)
+            .build();
+    }
 }
