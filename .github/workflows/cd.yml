@@ -32,7 +32,7 @@ jobs:
           echo "${{ secrets.APPLICATION_CORE_LOCAL_YML }}" | base64 -d > ./core/src/main/resources/application-core-local.yml          
 
       # 4. firebase_account.json 생성
-      - name : Generate firebase_account.json
+      - name: Generate firebase_account.json
         run: |
           mkdir -p ./core/src/main/resources/firebase
           echo "${{ secrets.FIREBASE_ACCOUNT }}" | base64 -d > ./core/src/main/resources/firebase/firebase_account.json
@@ -80,7 +80,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          password: ${{ secrets.EC2_PASSWORD }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
           source: "Dockerfile,docker-compose.yml,.env"
           target: "~/compose/"
@@ -91,9 +91,9 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          password: ${{ secrets.EC2_PASSWORD }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
-          script: |                        
+          script: |
             mkdir -p ~/compose
             cd ~/compose
             docker-compose down
