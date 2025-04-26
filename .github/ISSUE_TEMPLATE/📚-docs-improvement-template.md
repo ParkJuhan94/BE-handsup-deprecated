@@ -2,7 +2,7 @@
 name: "\U0001F4DA Docs Improvement Template"
 about: README, API 명세 등
 title: "[docs] : "
-labels: documentation
+labels: ''
 assignees: ParkJuhan94
 
 ---
