@@ -1,62 +1,66 @@
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // --- Spring Boot Starter ---
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-//    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
-
-    //redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    // 패스워드 암호화
-    implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
-    // JWT
+
+    // --- Database ---
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // --- Security & 암호화 ---
+    implementation 'org.mindrot:jbcrypt:0.4' // 비밀번호 해시
+    // spring-security, oauth2-client 나중에 필요하면 추가.
+
+    // --- JWT ---
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    //redisson
-    implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.25.1'
+    // --- Local Cache (Caffeine) ---
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 
-    // testFixtures 의존성
-    testFixturesImplementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-    testFixturesImplementation 'org.springframework:spring-tx:6.1.1'
-    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testFixturesImplementation "org.testcontainers:junit-jupiter:1.19.5"
-    testFixturesImplementation "org.testcontainers:testcontainers:1.19.5"
-    testFixturesImplementation "org.testcontainers:mysql:1.19.2" //mysql test container
+    // --- Redis (Redisson) ---
+    implementation 'org.redisson:redisson-spring-boot-starter:3.25.1'
 
-    testFixturesCompileOnly 'org.projectlombok:lombok'
-    testFixturesAnnotationProcessor 'org.projectlombok:lombok'
-    testFixturesCompileOnly 'org.springframework.boot:spring-boot-starter-security'
+    // --- AWS S3 ---
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
-    // QueryDsl
+    // --- FCM (Firebase) ---
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+    // --- Kafka ---
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // --- QueryDSL ---
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    //s3
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-
-    // FCM 알림
-    implementation 'com.google.firebase:firebase-admin:9.2.0'
-
-    // kafka
-    implementation 'org.springframework.kafka:spring-kafka'
+    // --- 테스트 ---
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    // spring-security-test는 주석 처리된 상태
+    testFixturesImplementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    testFixturesImplementation 'org.springframework:spring-tx:6.1.1'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testFixturesImplementation 'org.testcontainers:junit-jupiter:1.19.5'
+    testFixturesImplementation 'org.testcontainers:testcontainers:1.19.5'
+    testFixturesImplementation 'org.testcontainers:mysql:1.19.2'
+    testFixturesCompileOnly 'org.projectlombok:lombok'
+    testFixturesAnnotationProcessor 'org.projectlombok:lombok'
+    testFixturesCompileOnly 'org.springframework.boot:spring-boot-starter-security'
 }
 
 // Querydsl
 def generated = 'src/main/generated'
 
-// querydsl QClass 파일 생성 위치를 지정
+// QClass 생성 디렉터리 설정
 tasks.withType(JavaCompile) {
     options.getGeneratedSourceOutputDirectory().set(file(generated))
 }
 
-// java source set 에 querydsl QClass 위치 추가
+// java source set 에 Querydsl QClass 위치 추가
 sourceSets {
     main.java.srcDirs += [generated]
 }
