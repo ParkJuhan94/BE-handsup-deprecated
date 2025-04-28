@@ -68,6 +68,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
         List<Auction> content = queryFactory.select(QAuction.auction)
             .from(auction)
             .join(auction.product, product).fetchJoin()
+            .leftJoin(product.images).fetchJoin()
             .where(
                 auction.status.eq(AuctionStatus.BIDDING),
                 siEq(si),
