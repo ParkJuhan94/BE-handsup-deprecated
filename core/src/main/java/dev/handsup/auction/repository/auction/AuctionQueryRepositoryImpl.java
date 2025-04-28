@@ -65,9 +65,10 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
     @Override
     public Slice<Auction> sortAuctionByCriteria(String si, String gu, String dong,
         Pageable pageable) {
-        List<Auction> content = queryFactory.select(QAuction.auction)
+        List<Auction> content = queryFactory.select(QAuction.auction).distinct()
             .from(auction)
             .join(auction.product, product).fetchJoin()
+            .leftJoin(product.images).fetchJoin()
             .where(
                 auction.status.eq(AuctionStatus.BIDDING),
                 siEq(si),
