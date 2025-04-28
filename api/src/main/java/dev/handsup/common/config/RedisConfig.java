@@ -16,64 +16,78 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.chat.MessageSubscriber;
+import dev.handsup.common.dto.PageResponse;
 
 @Configuration
 public class RedisConfig {
 
-	@Value("${spring.data.redis.host}")
-	private String host;
+    @Value("${spring.data.redis.host}")
+    private String host;
 
-	@Value("${spring.data.redis.port}")
-	private int port;
+    @Value("${spring.data.redis.port}")
+    private int port;
 
-	@Value("${spring.data.redis.password:}")//
-	private String password;
+    @Value("${spring.data.redis.password:}")//
+    private String password;
 
-	@Bean
-	public RedisConnectionFactory redisConnectionFactory() {
-		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-		config.setHostName(host);
-		config.setPort(port);
-		if (!password.isEmpty()) {
-			config.setPassword(password);
-		}
-		return new LettuceConnectionFactory(config);
-	}
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(host);
+        config.setPort(port);
+        if (!password.isEmpty()) {
+            config.setPassword(password);
+        }
+        return new LettuceConnectionFactory(config);
+    }
 
-	@Bean
-	public PatternTopic chatTopic() {
-		return new PatternTopic("/sub/chat-rooms/*");
-	}
+    @Bean
+    public PatternTopic chatTopic() {
+        return new PatternTopic("/sub/chat-rooms/*");
+    }
 
-	@Bean
-	public RedisMessageListenerContainer redisContainer(
-		MessageListenerAdapter messageListener,
-		PatternTopic chatTopic
-	) {
-		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-		container.setConnectionFactory(redisConnectionFactory());
-		container.addMessageListener(messageListener, chatTopic);
+    @Bean
+    public RedisMessageListenerContainer redisContainer(
+        MessageListenerAdapter messageListener,
+        PatternTopic chatTopic
+    ) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(redisConnectionFactory());
+        container.addMessageListener(messageListener, chatTopic);
 
-		return container;
-	}
+        return container;
+    }
 
-	@Bean
-	public MessageListenerAdapter messageListener(
-		ObjectMapper objectMapper,
-		RedisTemplate<String, Object> redisTemplate,
-		SimpMessageSendingOperations messagingTemplate
-	) {
-		return new MessageListenerAdapter(
-			new MessageSubscriber(objectMapper, redisTemplate, messagingTemplate));
-	}
+    @Bean
+    public MessageListenerAdapter messageListener(
+        ObjectMapper objectMapper,
+        RedisTemplate<String, Object> redisTemplate,
+        SimpMessageSendingOperations messagingTemplate
+    ) {
+        return new MessageListenerAdapter(
+            new MessageSubscriber(objectMapper, redisTemplate, messagingTemplate));
+    }
 
-	@Bean
-	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-		return template;
-	}
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, PageResponse<RecommendAuctionResponse>> recommendAuctionRedisTemplate(
+        RedisConnectionFactory connectionFactory) {
+
+        RedisTemplate<String, PageResponse<RecommendAuctionResponse>> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
+
 }
