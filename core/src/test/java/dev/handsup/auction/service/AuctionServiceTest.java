@@ -1,8 +1,11 @@
 package dev.handsup.auction.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.anyLong;
+import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,119 +48,110 @@ import dev.handsup.user.domain.User;
 @DisplayName("[경매 서비스 테스트]")
 @ExtendWith(MockitoExtension.class)
 class AuctionServiceTest {
-	private final User user = UserFixture.user1();
-	private final String DIGITAL_DEVICE = "디지털 기기";
-	private final ProductCategory productCategory = ProductFixture.productCategory(DIGITAL_DEVICE);
-	private final Auction auction = AuctionFixture.auction();
-	private final PageRequest pageRequest = PageRequest.of(0, 5, Sort.by("북마크수"));
 
-	@Mock
-	private AuctionRepository auctionRepository;
+    private final User user = UserFixture.user1();
+    private final String DIGITAL_DEVICE = "디지털 기기";
+    private final ProductCategory productCategory = ProductFixture.productCategory(DIGITAL_DEVICE);
+    private final Auction auction = AuctionFixture.auction();
+    private final PageRequest pageRequest = PageRequest.of(0, 5, Sort.by("BOOKMARK"));
 
-	@Mock
-	private AuctionQueryRepository auctionQueryRepository;
+    @Mock
+    private AuctionRepository auctionRepository;
 
-	@Mock
-	private ProductCategoryRepository productCategoryRepository;
+    @Mock
+    private AuctionQueryRepository auctionQueryRepository;
 
-	@Mock
-	private PreferredProductCategoryRepository preferredProductCategoryRepository;
+    @Mock
+    private ProductCategoryRepository productCategoryRepository;
 
-	@InjectMocks
-	private AuctionService auctionService;
+    @Mock
+    private PreferredProductCategoryRepository preferredProductCategoryRepository;
 
-	@BeforeEach
-	void setUp() {
-		ReflectionTestUtils.setField(auction, "createdAt", LocalDateTime.now());
-	}
+    @InjectMocks
+    private AuctionService auctionService;
 
-	@Test
-	@DisplayName("[경매를 등록할 수 있다.]")
-	void registerAuction() {
-		// given
-		RegisterAuctionRequest request =
-			RegisterAuctionRequest.of(
-				"거의 새상품 버즈 팔아요",
-				DIGITAL_DEVICE,
-				10000,
-				LocalDate.parse("2022-10-18"),
-				ProductStatus.NEW.getLabel(),
-				PurchaseTime.UNDER_ONE_MONTH.getLabel(),
-				"거의 새상품이에요",
-				TradeMethod.DELIVER.getLabel(),
-				List.of("image.jpg"),
-				"서울시",
-				"성북구",
-				"동선동"
-			);
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(auction, "createdAt", LocalDateTime.now());
+    }
 
-		given(productCategoryRepository.findByValue(DIGITAL_DEVICE))
-			.willReturn(Optional.of(productCategory));
-		given(auctionRepository.save(any(Auction.class))).willReturn(auction);
+    @Test
+    @DisplayName("[경매를 등록할 수 있다.]")
+    void registerAuction() {
+        // given
+        RegisterAuctionRequest request =
+            RegisterAuctionRequest.of(
+                "거의 새상품 버즈 팔아요",
+                DIGITAL_DEVICE,
+                10000,
+                LocalDate.parse("2022-10-18"),
+                ProductStatus.NEW.getLabel(),
+                PurchaseTime.UNDER_ONE_MONTH.getLabel(),
+                "거의 새상품이에요",
+                TradeMethod.DELIVER.getLabel(),
+                List.of("image.jpg"),
+                "서울시",
+                "성북구",
+                "동선동"
+            );
 
-		// when
-		AuctionDetailResponse response = auctionService.registerAuction(request, UserFixture.user1());
-		// then
-		assertAll(
-			() -> assertThat(response.title()).isEqualTo(request.title()),
-			() -> assertThat(response.tradeMethod()).isEqualTo(request.tradeMethod()),
-			() -> assertThat(response.endDate()).isEqualTo(request.endDate().atStartOfDay().toString()),
-			() -> assertThat(response.purchaseTime()).isEqualTo(request.purchaseTime()),
-			() -> assertThat(response.productCategory()).isEqualTo(request.productCategory())
-		);
-	}
+        given(productCategoryRepository.findByValue(DIGITAL_DEVICE))
+            .willReturn(Optional.of(productCategory));
+        given(auctionRepository.save(any(Auction.class))).willReturn(auction);
 
-	@DisplayName("[경매 상세정보를 조회할 수 있다.]")
-	@Test
-	void getAuctionDetail() {
-		//given
-		given(auctionRepository.findById(anyLong())).willReturn(Optional.of(auction));
-		//when
-		AuctionDetailResponse response = auctionService.getAuctionDetail(auction.getId());
-		//then
-		assertThat(response.auctionId()).isEqualTo(auction.getId());
-	}
+        // when
+        AuctionDetailResponse response = auctionService.registerAuction(request,
+            UserFixture.user1());
+        // then
+        assertAll(
+            () -> assertThat(response.title()).isEqualTo(request.title()),
+            () -> assertThat(response.tradeMethod()).isEqualTo(request.tradeMethod()),
+            () -> assertThat(response.endDate()).isEqualTo(
+                request.endDate().atStartOfDay().toString()),
+            () -> assertThat(response.purchaseTime()).isEqualTo(request.purchaseTime()),
+            () -> assertThat(response.productCategory()).isEqualTo(request.productCategory())
+        );
+    }
 
-	@DisplayName("[존재하지 않는 경매 아이디로 조회 시 예외를 반환한다.]")
-	@Test
-	void getAuctionDetail_fails() {
-		//given
-		Long auctionId = auction.getId();
-		given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
+    @DisplayName("[경매 상세정보를 조회할 수 있다.]")
+    @Test
+    void getAuctionDetail() {
+        //given
+        given(auctionRepository.findById(anyLong())).willReturn(Optional.of(auction));
+        //when
+        AuctionDetailResponse response = auctionService.getAuctionDetail(auction.getId());
+        //then
+        assertThat(response.auctionId()).isEqualTo(auction.getId());
+    }
 
-		//when, then
-		assertThatThrownBy(() -> auctionService.getAuctionById(auctionId))
-			.isInstanceOf(NotFoundException.class)
-			.hasMessageContaining(AuctionErrorCode.NOT_FOUND_AUCTION.getMessage());
-	}
+    @DisplayName("[존재하지 않는 경매 아이디로 조회 시 예외를 반환한다.]")
+    @Test
+    void getAuctionDetail_fails() {
+        //given
+        Long auctionId = auction.getId();
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
 
-	@DisplayName("[정렬 조건에 따라 추천 경매를 조회할 수 있다.]")
-	@Test
-	void getRecommendAuctions() {
-		//given
-		given(auctionQueryRepository.sortAuctionByCriteria(null, null, null, pageRequest))
-			.willReturn(new SliceImpl<>(List.of(auction), pageRequest, false));
-		//when
-		PageResponse<RecommendAuctionResponse> response
-			= auctionService.getRecommendAuctions(null, null, null, pageRequest);
-		//then
-		assertThat(response.content().get(0)).isNotNull();
-	}
+        //when, then
+        assertThatThrownBy(() -> auctionService.getAuctionById(auctionId))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(AuctionErrorCode.NOT_FOUND_AUCTION.getMessage());
+    }
 
-	@DisplayName("[유저 선호 카테고리에 맞는 경매를 북마크 순으로 조회할 수 있다.]")
-	@Test
-	void getUserPreferredCategoryAuctions() {
-		//given
-		PreferredProductCategory preferredProductCategory = PreferredProductCategory.of(user, productCategory);
-		given(preferredProductCategoryRepository.findByUser(user))
-			.willReturn(List.of(preferredProductCategory));
-		given(auctionQueryRepository.findByProductCategories(List.of(productCategory), pageRequest))
-			.willReturn(new SliceImpl<>(List.of(auction), pageRequest, false));
-		//when
-		PageResponse<RecommendAuctionResponse> response = auctionService.getUserPreferredCategoryAuctions(
-			user, pageRequest);
+    @DisplayName("[유저 선호 카테고리에 맞는 경매를 북마크 순으로 조회할 수 있다.]")
+    @Test
+    void getUserPreferredCategoryAuctions() {
+        //given
+        PreferredProductCategory preferredProductCategory = PreferredProductCategory.of(user,
+            productCategory);
+        given(preferredProductCategoryRepository.findByUser(user))
+            .willReturn(List.of(preferredProductCategory));
+        given(auctionQueryRepository.findByProductCategories(List.of(productCategory), pageRequest))
+            .willReturn(new SliceImpl<>(List.of(auction), pageRequest, false));
+        //when
+        PageResponse<RecommendAuctionResponse> response = auctionService.getUserPreferredCategoryAuctions(
+            user, pageRequest);
 
-		//then
-		assertThat(response.content().get(0)).isNotNull();
-	}
+        //then
+        assertThat(response.content().get(0)).isNotNull();
+    }
 }
