@@ -3,9 +3,7 @@ package dev.handsup.auction.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,8 +68,17 @@ public class AuctionApiController {
         @RequestParam(value = "si", required = false) String si,
         @RequestParam(value = "gu", required = false) String gu,
         @RequestParam(value = "dong", required = false) String dong,
-
-            si, gu, dong, pageable);
+        @Parameter(
+            name = "sort",
+            description = AuctionSwaggerDoc.SortOption.DESCRIPTION,
+            schema = @Schema(implementation = AuctionSortOption.class)
+        )
+        @RequestParam(value = "sort", required = false) String sort,
+        @RequestParam(value = "page", defaultValue = "0") int page,
+        @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        PageResponse<RecommendAuctionResponse> response = auctionCacheService.getRecommendAuctions(
+            si, gu, dong, page, size, sort);
         return ResponseEntity.ok(response);
     }
 
