@@ -3,4 +3,6 @@
 /usr/local/bin/wait-for-it.sh hands-up-mysql:3306 -t 40
 
 # 준비되면 애플리케이션 실행
-exec java -jar /app/app.jar
+exec java \
+  -Xlog:gc*:file=/logs/gc.log:time \
+  -jar /app/app.jar
