@@ -29,9 +29,11 @@ services:
 
   app:
     image: ${DOCKERHUB_USERNAME}/${DOCKERHUB_APP_NAME}:latest
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
+    #    build:
+    #      context: .
+    #      dockerfile: Dockerfile
+    volumes:
+      - ./gc-logs:/logs
     container_name: hands-up-app
     ports:
       - "8080:8080"
