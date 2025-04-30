@@ -158,11 +158,9 @@ class AuctionApiControllerTest extends ApiTestSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.size").value(2))
             .andExpect(jsonPath("$.content[0].auctionId").value(auction2.getId()))
-            .andExpect(jsonPath("$.content[0].endDate").value(
-                auction2.getEndDate().atStartOfDay().toString()))
+            .andExpect(jsonPath("$.content[0].endDate").value(auction2.getEndDate().toString()))
             .andExpect(jsonPath("$.content[1].auctionId").value(auction1.getId()))
-            .andExpect(jsonPath("$.content[1].endDate").value(
-                auction1.getEndDate().atStartOfDay().toString()))
+            .andExpect(jsonPath("$.content[1].endDate").value(auction1.getEndDate().toString()))
             .andExpect(jsonPath("$.hasNext").value(false));
     }
 
