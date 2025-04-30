@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 
-import dev.handsup.auction.dto.mapper.AuctionMapper;
 import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.auction.exception.AuctionErrorCode;
 import dev.handsup.auction.repository.auction.AuctionQueryRepository;
@@ -54,8 +53,7 @@ public class AuctionCacheService {
 
         // 3. DB 조회
         Slice<RecommendAuctionResponse> auctionSlice = auctionQueryRepository
-            .sortAuctionByCriteria(si, gu, dong, pageable)
-            .map(AuctionMapper::toRecommendAuctionResponse);
+            .sortAuctionByCriteria(si, gu, dong, pageable);
 
         PageResponse<RecommendAuctionResponse> response = CommonMapper.toPageResponse(auctionSlice);
 

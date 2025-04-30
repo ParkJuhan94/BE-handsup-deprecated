@@ -26,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import dev.handsup.auction.domain.Auction;
+import dev.handsup.auction.domain.auction_field.TradingLocation;
 import dev.handsup.auction.dto.mapper.AuctionMapper;
 import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.auction.exception.AuctionErrorCode;
@@ -142,7 +143,12 @@ class AuctionCacheServiceTest {
         given(redisTemplate.opsForValue().get(key)).willReturn(null);
         given(auctionQueryRepository.sortAuctionByCriteria(any(), any(), any(), any()))
             .willReturn(
-                new SliceImpl<>(List.of(auction1, auction2), pageable, false));
+                new SliceImpl<>(
+                    List.of(
+                        AuctionMapper.toRecommendAuctionResponse(auction1),
+                        AuctionMapper.toRecommendAuctionResponse(auction2)
+                    ), pageable, false)
+            );
 
         // when
         PageResponse<RecommendAuctionResponse> response = auctionCacheService.getRecommendAuctions(
@@ -164,12 +170,12 @@ class AuctionCacheServiceTest {
     @DisplayName("[정렬 조건이 없으면 예외를 던진다.]")
     void getRecommendAuctions_noSort_throwsException() {
         // when, then
-        assertThatThrownBy(() -> auctionCacheService.getRecommendAuctions(
-            auction1.getTradingLocation().getSi(),
-            auction1.getTradingLocation().getGu(),
-            auction1.getTradingLocation().getDong(),
-            0, 5, null
-        ))
+        TradingLocation tradingLocation = auction1.getTradingLocation();
+        String si = tradingLocation.getSi();
+        String gu = tradingLocation.getGu();
+        String dong = tradingLocation.getDong();
+
+        assertThatThrownBy(() -> auctionCacheService.getRecommendAuctions(si, gu, dong, 0, 5, null))
             .isInstanceOf(NotFoundException.class)
             .hasMessageContaining(AuctionErrorCode.EMPTY_SORT_INPUT.getMessage());
     }
