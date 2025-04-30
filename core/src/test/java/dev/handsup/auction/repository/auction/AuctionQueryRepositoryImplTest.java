@@ -23,6 +23,7 @@ import dev.handsup.auction.domain.auction_field.TradeMethod;
 import dev.handsup.auction.domain.product.ProductStatus;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
 import dev.handsup.auction.dto.request.AuctionSearchCondition;
+import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.auction.repository.product.ProductCategoryRepository;
 import dev.handsup.common.support.DataJpaTestSupport;
 import dev.handsup.fixture.AuctionFixture;
@@ -234,21 +235,28 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
     @Test
     void sortAuctionByCriteria() {
         //given
-        Auction auction1 = AuctionFixture.auction(category1);
-        ReflectionTestUtils.setField(auction1, "biddingCount", 4);
-        Auction auction2 = AuctionFixture.auction(category1);
-        ReflectionTestUtils.setField(auction2, "biddingCount", 5);
+        String si = "서울시", gu = "서초구", dong1 = "방배동", dong2 = "반포동";
+        Auction auction1 = AuctionFixture.auction(category1, si, gu, dong1);
+        ReflectionTestUtils.setField(auction1, "biddingCount", 2);
+        Auction auction2 = AuctionFixture.auction(category1, si, gu, dong1);
+        ReflectionTestUtils.setField(auction2, "biddingCount", 8);
+        Auction auction3 = AuctionFixture.auction(category1, si, gu, dong2);
+        ReflectionTestUtils.setField(auction3, "biddingCount", 4);
 
-        auctionRepository.saveAll(List.of(auction1, auction2));
+        auctionRepository.saveAll(List.of(auction1, auction2, auction3));
         PageRequest pageRequest1 = PageRequest.of(
             0, 10, Sort.by("BIDDING")
         );
         //when
-        List<Auction> auctions = auctionQueryRepository.sortAuctionByCriteria(null, null, null,
-                pageRequest1)
+        List<RecommendAuctionResponse> recommendAuctionResponses = auctionQueryRepository.sortAuctionByCriteria(
+                si, gu, dong1, pageRequest1)
             .getContent();
         //then
-        assertThat(auctions).containsExactly(auction2, auction1);
+        assertAll(
+            () -> assertThat(recommendAuctionResponses).hasSize(2),
+            () -> assertThat(recommendAuctionResponses.get(0).biddingCount()).isEqualTo(8),
+            () -> assertThat(recommendAuctionResponses.get(1).biddingCount()).isEqualTo(2)
+        );
     }
 
     @DisplayName("[특정 지역 필터 + 북마크순으로 경매를 조회할 수 있다.]")
@@ -257,11 +265,11 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         //given
         String si = "서울시", gu = "서초구", dong1 = "방배동", dong2 = "반포동";
         Auction auction1 = AuctionFixture.auction(category1, si, gu, dong1);
-        ReflectionTestUtils.setField(auction1, "bookmarkCount", 4);
-        Auction auction2 = AuctionFixture.auction(category2, si, gu, dong1);
-        ReflectionTestUtils.setField(auction2, "bookmarkCount", 5);
-        Auction auction3 = AuctionFixture.auction(category2, si, gu, dong2);
-        ReflectionTestUtils.setField(auction2, "bookmarkCount", 5);
+        ReflectionTestUtils.setField(auction1, "bookmarkCount", 2);
+        Auction auction2 = AuctionFixture.auction(category1, si, gu, dong1);
+        ReflectionTestUtils.setField(auction2, "bookmarkCount", 8);
+        Auction auction3 = AuctionFixture.auction(category1, si, gu, dong2);
+        ReflectionTestUtils.setField(auction3, "bookmarkCount", 4);
 
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
         PageRequest pageRequest1 = PageRequest.of(
@@ -269,11 +277,16 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         );
 
         //when
-        List<Auction> auctions = auctionQueryRepository.sortAuctionByCriteria(si, gu, dong1,
-                pageRequest1)
+        List<RecommendAuctionResponse> recommendAuctionResponses = auctionQueryRepository.sortAuctionByCriteria(
+                si, gu, dong1, pageRequest1)
             .getContent();
+
         //then
-        assertThat(auctions).containsExactly(auction2, auction1);
+        assertAll(
+            () -> assertThat(recommendAuctionResponses).hasSize(2),
+            () -> assertThat(recommendAuctionResponses.get(0).bookmarkCount()).isEqualTo(8),
+            () -> assertThat(recommendAuctionResponses.get(1).bookmarkCount()).isEqualTo(2)
+        );
     }
 
     @DisplayName("[사용자 선호 카테고리에 속하는 해당하는 경매를 북마크순으로 조회할 수 있다.]")
