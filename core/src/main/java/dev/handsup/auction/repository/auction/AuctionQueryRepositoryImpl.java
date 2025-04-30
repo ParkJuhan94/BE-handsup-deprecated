@@ -17,7 +17,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import dev.handsup.auction.domain.Auction;
@@ -25,8 +27,11 @@ import dev.handsup.auction.domain.QAuction;
 import dev.handsup.auction.domain.auction_field.AuctionStatus;
 import dev.handsup.auction.domain.auction_field.TradeMethod;
 import dev.handsup.auction.domain.product.ProductStatus;
+import dev.handsup.auction.domain.product.QProduct;
+import dev.handsup.auction.domain.product.QProductImage;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
 import dev.handsup.auction.dto.request.AuctionSearchCondition;
+import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.auction.exception.AuctionErrorCode;
 import dev.handsup.common.exception.ValidationException;
 
@@ -58,17 +63,37 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
             .limit(pageable.getPageSize() + 1L)
             .offset(pageable.getOffset())
             .fetch();
-        boolean hasNext = hasNext(pageable.getPageSize(), content);
+        boolean hasNext = hasNextAuction(pageable.getPageSize(), content);
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
     @Override
-    public Slice<Auction> sortAuctionByCriteria(String si, String gu, String dong,
+    public Slice<RecommendAuctionResponse> sortAuctionByCriteria(String si, String gu, String dong,
         Pageable pageable) {
-        List<Auction> content = queryFactory.select(QAuction.auction).distinct()
+
+        QAuction auction = QAuction.auction;
+        QProduct product = QProduct.product;
+        QProductImage imageSub = new QProductImage("imageSub");
+
+        List<RecommendAuctionResponse> content = queryFactory
+            .select(Projections.constructor(RecommendAuctionResponse.class,
+                auction.id,
+                auction.title,
+                auction.tradingLocation.dong,
+                auction.currentBiddingPrice,
+                JPAExpressions
+                    .select(imageSub.imageUrl)
+                    .from(imageSub)
+                    .where(imageSub.product.eq(product))
+                    .orderBy(imageSub.id.asc())
+                    .limit(1),  // id가 가장 작은 = 대표 이미지
+                auction.bookmarkCount,
+                auction.biddingCount,
+                auction.createdAt.stringValue(),
+                auction.endDate.stringValue()
+            ))
             .from(auction)
-            .join(auction.product, product).fetchJoin()
-            .leftJoin(product.images).fetchJoin()
+            .join(auction.product, product)
             .where(
                 auction.status.eq(AuctionStatus.BIDDING),
                 siEq(si),
@@ -76,10 +101,12 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
                 dongEq(dong)
             )
             .orderBy(recommendAuctionSort(pageable))
-            .limit(pageable.getPageSize() + 1L)
+            .limit(pageable.getPageSize() + 1L) // Slice 페이징
             .offset(pageable.getOffset())
             .fetch();
-        boolean hasNext = hasNext(pageable.getPageSize(), content);
+
+        boolean hasNext = hasNextRecommendAuctionResponse(pageable.getPageSize(), content);
+
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
@@ -96,7 +123,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
             .limit(pageable.getPageSize() + 1L)
             .offset(pageable.getOffset())
             .fetch();
-        boolean hasNext = hasNext(pageable.getPageSize(), content);
+        boolean hasNext = hasNextAuction(pageable.getPageSize(), content);
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
@@ -195,11 +222,20 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
         return null;
     }
 
-    private boolean hasNext(int pageSize, List<Auction> auctions) {
+    private boolean hasNextAuction(int pageSize, List<Auction> auctions) {
         if (auctions.size() <= pageSize) {
             return false;
         }
         auctions.remove(pageSize);
+        return true;
+    }
+
+    private boolean hasNextRecommendAuctionResponse(int pageSize,
+        List<RecommendAuctionResponse> recommendAuctionResponses) {
+        if (recommendAuctionResponses.size() <= pageSize) {
+            return false;
+        }
+        recommendAuctionResponses.remove(pageSize);
         return true;
     }
 }

@@ -8,13 +8,17 @@ import org.springframework.data.domain.Slice;
 import dev.handsup.auction.domain.Auction;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
 import dev.handsup.auction.dto.request.AuctionSearchCondition;
+import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 
 public interface AuctionQueryRepository {
-	Slice<Auction> searchAuctions(AuctionSearchCondition auctionSearchCondition, Pageable pageable);
 
-	Slice<Auction> sortAuctionByCriteria(String si, String gu, String dong, Pageable pageable);
+    Slice<Auction> searchAuctions(AuctionSearchCondition auctionSearchCondition, Pageable pageable);
 
-	Slice<Auction> findByProductCategories(List<ProductCategory> productCategories, Pageable pageable);
+    Slice<RecommendAuctionResponse> sortAuctionByCriteria(String si, String gu, String dong,
+        Pageable pageable);
 
-	void updateAuctionStatusAfterEndDate();
+    Slice<Auction> findByProductCategories(List<ProductCategory> productCategories,
+        Pageable pageable);
+
+    void updateAuctionStatusAfterEndDate();
 }
