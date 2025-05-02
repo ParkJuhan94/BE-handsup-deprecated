@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import dev.handsup.auction.domain.Auction;
@@ -73,7 +72,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
 
         QAuction auction = QAuction.auction;
         QProduct product = QProduct.product;
-        QProductImage imageSub = new QProductImage("imageSub");
+        QProductImage productImage = QProductImage.productImage;
 
         List<RecommendAuctionResponse> content = queryFactory
             .select(Projections.constructor(RecommendAuctionResponse.class,
@@ -81,12 +80,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
                 auction.title,
                 auction.tradingLocation.dong,
                 auction.currentBiddingPrice,
-                JPAExpressions
-                    .select(imageSub.imageUrl)
-                    .from(imageSub)
-                    .where(imageSub.product.eq(product))
-                    .orderBy(imageSub.id.asc())
-                    .limit(1),  // id가 가장 작은 = 대표 이미지
+                productImage.imageUrl,  // 대표 이미지
                 auction.bookmarkCount,
                 auction.biddingCount,
                 auction.createdAt.stringValue(),
@@ -94,6 +88,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
             ))
             .from(auction)
             .join(auction.product, product)
+            .leftJoin(product.images, productImage).on(productImage.isMain.isTrue())
             .where(
                 auction.status.eq(AuctionStatus.BIDDING),
                 siEq(si),
@@ -101,7 +96,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
                 dongEq(dong)
             )
             .orderBy(recommendAuctionSort(pageable))
-            .limit(pageable.getPageSize() + 1L) // Slice 페이징
+            .limit(pageable.getPageSize() + 1L)
             .offset(pageable.getOffset())
             .fetch();
 
