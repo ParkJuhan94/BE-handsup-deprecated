@@ -1,7 +1,9 @@
 package dev.handsup.notification.domain.service;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,36 +28,36 @@ import dev.handsup.user.domain.User;
 @ExtendWith(MockitoExtension.class)
 class FCMServiceTest {
 
-	private final User receiver = UserFixture.user1();
-	private final Auction auction = AuctionFixture.auction();
-	@Mock
-	private FCMTokenRepository fcmTokenRepository;
-	@Mock
-	private FirebaseMessaging firebaseMessaging;
-	@Mock
-	private NotificationService notificationService;
-	@InjectMocks
-	private FCMService fcmService;
+    private final User receiver = UserFixture.user1();
+    private final Auction auction = AuctionFixture.auction();
+    @Mock
+    private FCMTokenRepository fcmTokenRepository;
+    @Mock
+    private FirebaseMessaging firebaseMessaging;
+    @Mock
+    private NotificationService notificationService;
+    @InjectMocks
+    private FCMService fcmService;
 
-	@Test
-	@DisplayName("메시지를 성공적으로 보낸다]")
-	void sendMessageSuccessTest() throws FirebaseMessagingException {
-		// given
-		String receiverEmail = receiver.getEmail();
-		String fcmToken = "fcmToken123";
-		given(fcmTokenRepository.getFcmToken(receiverEmail)).willReturn(fcmToken);
+    @Test
+    @DisplayName("메시지를 성공적으로 보낸다]")
+    void sendMessageSuccessTest() throws FirebaseMessagingException {
+        // given
+        String receiverEmail = receiver.getEmail();
+        String fcmToken = "fcmToken123";
+        given(fcmTokenRepository.getFcmToken(receiverEmail)).willReturn(fcmToken);
 
-		// when
-		fcmService.sendMessage(
-			"senderEmail",
-			"senderNickname",
-			receiverEmail,
-			NotificationType.BOOKMARK,
-			auction
-		);
+        // when
+        fcmService.sendMessage(
+            "senderEmail",
+            "senderNickname",
+            receiverEmail,
+            NotificationType.BOOKMARK,
+            auction.getId()
+        );
 
-		// then
-		verify(firebaseMessaging, times(1)).send(any());
-	}
+        // then
+        verify(firebaseMessaging, times(1)).send(any());
+    }
 
 }
