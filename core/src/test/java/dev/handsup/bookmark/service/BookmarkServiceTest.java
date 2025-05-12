@@ -1,8 +1,8 @@
 package dev.handsup.bookmark.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import dev.handsup.auction.domain.Auction;
 import dev.handsup.auction.repository.auction.AuctionRepository;
+import dev.handsup.auction.service.AuctionService;
 import dev.handsup.bookmark.domain.Bookmark;
 import dev.handsup.bookmark.dto.EditBookmarkResponse;
 import dev.handsup.bookmark.dto.FindUserBookmarkResponse;
@@ -35,82 +36,90 @@ import dev.handsup.user.domain.User;
 @DisplayName("[BookmarkService 테스트]")
 @ExtendWith(MockitoExtension.class)
 class BookmarkServiceTest {
-	private final User user = UserFixture.user1();
-	private final PageRequest pageRequest = PageRequest.of(0, 5);
-	private final Auction auction = AuctionFixture.auction(UserFixture.user2());
-	@Mock
-	private AuctionRepository auctionRepository;
-	@Mock
-	private BookmarkRepository bookmarkRepository;
-	@Mock
-	private FCMService fcmService;
-	@InjectMocks
-	private BookmarkService bookmarkService;
 
-	@DisplayName("[북마크를 추가할 수 있다.]")
-	@Test
-	void addBookmark() {
-		//given
-		int initialBookmarkCount = auction.getBookmarkCount();
-		Bookmark bookmark = BookmarkFixture.bookmark(user, auction);
+    private final User user = UserFixture.user1();
+    private final PageRequest pageRequest = PageRequest.of(0, 5);
+    private final Auction auction = AuctionFixture.auction(UserFixture.user2());
 
-		given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
-		given(bookmarkRepository.findByUserAndAuction(user, auction)).willReturn(Optional.empty());
-		given(bookmarkRepository.save(any(Bookmark.class))).willReturn(bookmark);
+    @Mock
+    private BookmarkRepository bookmarkRepository;
 
-		//when
-		EditBookmarkResponse response = bookmarkService.addBookmark(user, auction.getId());
+    @Mock
+    private FCMService fcmService;
 
-		//then
-		assertThat(response.bookmarkCount()).isEqualTo(initialBookmarkCount + 1);
-	}
+    @Mock
+    private AuctionService auctionService;
 
-	@DisplayName("[북마크를 삭제할 수 있다.]")
-	@Test
-	void cancelBookmark() {
-		//given
-		int initialBookmarkCount = auction.getBookmarkCount();
-		Bookmark bookmark = BookmarkFixture.bookmark(user, auction);
+    @Mock
+    private AuctionRepository auctionRepository;
 
-		given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
-		given(bookmarkRepository.findByUserAndAuction(user, auction)).willReturn(Optional.of(bookmark));
+    @InjectMocks
+    private BookmarkService bookmarkService;
 
-		//when
-		EditBookmarkResponse response = bookmarkService.cancelBookmark(user, auction.getId());
+    @DisplayName("[북마크를 추가할 수 있다.]")
+    @Test
+    void addBookmark() {
+        //given
+        int initialBookmarkCount = auction.getBookmarkCount();
+        Bookmark bookmark = BookmarkFixture.bookmark(user, auction);
 
-		//then
-		assertThat(response.bookmarkCount()).isEqualTo(initialBookmarkCount - 1);
-	}
+        given(auctionService.getAuctionById(auction.getId())).willReturn(auction);
+        given(bookmarkRepository.findByUserAndAuction(user, auction)).willReturn(Optional.empty());
+        given(bookmarkRepository.save(any(Bookmark.class))).willReturn(bookmark);
 
-	@DisplayName("[유저 북마크 여부를 확인할 수 있다.")
-	@Test
-	void checkBookmarkStatus() {
-		//given
-		given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
-		given(bookmarkRepository.existsByUserAndAuction(user, auction)).willReturn(true);
+        //when
+        EditBookmarkResponse response = bookmarkService.addBookmark(user, auction.getId());
 
-		//when
-		GetBookmarkStatusResponse response = bookmarkService.getBookmarkStatus(user, auction.getId());
+        //then
+        assertThat(response.bookmarkCount()).isEqualTo(initialBookmarkCount + 1);
+    }
 
-		//then
-		assertThat(response.isBookmarked()).isTrue();
-	}
+    @DisplayName("[북마크를 삭제할 수 있다.]")
+    @Test
+    void cancelBookmark() {
+        //given
+        int initialBookmarkCount = auction.getBookmarkCount();
+        Bookmark bookmark = BookmarkFixture.bookmark(user, auction);
 
-	@DisplayName("[유저 북마크를 모두 조회할 수 있다.]")
-	@Test
-	void findUserBookmarks() {
-		//given
-		given(auctionRepository.findBookmarkAuction(user, pageRequest))
-			.willReturn(new SliceImpl<>(List.of(auction), pageRequest, false));
-		ReflectionTestUtils.setField(auction, "createdAt", LocalDateTime.now());
+        given(auctionService.getAuctionById(auction.getId())).willReturn(auction);
+        given(bookmarkRepository.findByUserAndAuction(user, auction)).willReturn(Optional.of(bookmark));
 
-		//when
-		PageResponse<FindUserBookmarkResponse> response
-			= bookmarkService.findUserBookmarks(user, pageRequest);
+        //when
+        EditBookmarkResponse response = bookmarkService.cancelBookmark(user, auction.getId());
 
-		//then
-		assertThat(response.size()).isEqualTo(1);
-		assertThat(response.content().get(0).createdDate())
-			.isEqualTo(auction.getCreatedAt().toLocalDate().toString());
-	}
+        //then
+        assertThat(response.bookmarkCount()).isEqualTo(initialBookmarkCount - 1);
+    }
+
+    @DisplayName("[유저 북마크 여부를 확인할 수 있다.")
+    @Test
+    void checkBookmarkStatus() {
+        //given
+        given(auctionService.getAuctionById(auction.getId())).willReturn(auction);
+        given(bookmarkRepository.existsByUserAndAuction(user, auction)).willReturn(true);
+
+        //when
+        GetBookmarkStatusResponse response = bookmarkService.getBookmarkStatus(user, auction.getId());
+
+        //then
+        assertThat(response.isBookmarked()).isTrue();
+    }
+
+    @DisplayName("[유저 북마크를 모두 조회할 수 있다.]")
+    @Test
+    void findUserBookmarks() {
+        //given
+        given(auctionRepository.findBookmarkAuction(user, pageRequest))
+            .willReturn(new SliceImpl<>(List.of(auction), pageRequest, false));
+        ReflectionTestUtils.setField(auction, "createdAt", LocalDateTime.now());
+
+        //when
+        PageResponse<FindUserBookmarkResponse> response
+            = bookmarkService.findUserBookmarks(user, pageRequest);
+
+        //then
+        assertThat(response.size()).isEqualTo(1);
+        assertThat(response.content().get(0).createdDate())
+            .isEqualTo(auction.getCreatedAt().toLocalDate().toString());
+    }
 }

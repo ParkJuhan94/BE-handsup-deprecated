@@ -2,6 +2,8 @@ package dev.handsup.user.service;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -33,137 +35,142 @@ import dev.handsup.user.dto.response.UserSaleHistoryResponse;
 import dev.handsup.user.exception.UserErrorCode;
 import dev.handsup.user.repository.UserRepository;
 import dev.handsup.user.repository.UserReviewLabelRepository;
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-	private final UserRepository userRepository;
-	private final EncryptHelper encryptHelper;
-	private final PreferredProductCategoryRepository preferredProductCategoryRepository;
-	private final ProductCategoryRepository productCategoryRepository;
-	private final UserReviewLabelRepository userReviewLabelRepository;
-	private final ReviewRepository reviewRepository;
-	private final BiddingRepository biddingRepository;
-	private final AuctionRepository auctionRepository;
+    private final UserRepository userRepository;
+    private final EncryptHelper encryptHelper;
+    private final PreferredProductCategoryRepository preferredProductCategoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final UserReviewLabelRepository userReviewLabelRepository;
+    private final ReviewRepository reviewRepository;
+    private final BiddingRepository biddingRepository;
+    private final AuctionRepository auctionRepository;
 
-	private void validateDuplicateEmail(String email) {
-		if (userRepository.findByEmail(email).isPresent()) {
-			throw new ValidationException(UserErrorCode.DUPLICATED_EMAIL);
-		}
-	}
+    private void validateDuplicateEmail(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ValidationException(UserErrorCode.DUPLICATED_EMAIL);
+        }
+    }
 
-	public User getUserById(Long userId) {
-		return userRepository.findById(userId)
-			.orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_USER));
-	}
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_USER));
+    }
 
-	public User getUserByEmail(String email) {
-		return userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_BY_EMAIL));
-	}
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new NotFoundException(UserErrorCode.NOT_FOUND_BY_EMAIL));
+    }
 
-	@Transactional
-	public Long join(JoinUserRequest request) {
-		validateDuplicateEmail(request.email());
-		User user = UserMapper.toUser(request, encryptHelper);
-		User savedUser = userRepository.save(user);    // 저장된 유저 확인
+    @Transactional
+    public void updateReadNotificationCount(User user, int count) {
+        user.updateReadNotificationCount(count);
+        userRepository.save(user);
+    }
 
-		request.productCategoryIds().forEach(productCategoryId -> {
-			ProductCategory productCategory = getProductCategoryById(productCategoryId);
-			preferredProductCategoryRepository.save(
-				PreferredProductCategory.of(savedUser, productCategory)
-			);
-		});
+    @Transactional
+    public Long join(JoinUserRequest request) {
+        validateDuplicateEmail(request.email());
+        User user = UserMapper.toUser(request, encryptHelper);
+        User savedUser = userRepository.save(user);    // 저장된 유저 확인
 
-		return savedUser.getId();
-	}
+        request.productCategoryIds().forEach(productCategoryId -> {
+            ProductCategory productCategory = getProductCategoryById(productCategoryId);
+            preferredProductCategoryRepository.save(
+                PreferredProductCategory.of(savedUser, productCategory)
+            );
+        });
 
-	public EmailAvailabilityResponse isEmailAvailable(String email) {
-		boolean isEmailAvailable = userRepository.findByEmail(email).isEmpty();
-		return EmailAvailabilityResponse.from(isEmailAvailable);
-	}
+        return savedUser.getId();
+    }
 
-	@Transactional(readOnly = true)
-	public PageResponse<UserReviewLabelResponse> getUserReviewLabels(Long userId, Pageable pageable) {
-		Slice<UserReviewLabelResponse> userReviewLabelResponsePage = userReviewLabelRepository
-			.findByUserIdOrderByIdAsc(userId, pageable)
-			.map(UserMapper::toUserReviewLabelResponse);
-		return CommonMapper.toPageResponse(userReviewLabelResponsePage);
-	}
+    public EmailAvailabilityResponse isEmailAvailable(String email) {
+        boolean isEmailAvailable = userRepository.findByEmail(email).isEmpty();
+        return EmailAvailabilityResponse.from(isEmailAvailable);
+    }
 
-	public ProductCategory getProductCategoryById(Long productCategoryId) {
-		return productCategoryRepository.findById(productCategoryId)
-			.orElseThrow(() -> new NotFoundException(AuctionErrorCode.NOT_FOUND_PRODUCT_CATEGORY));
-	}
+    @Transactional(readOnly = true)
+    public PageResponse<UserReviewLabelResponse> getUserReviewLabels(Long userId, Pageable pageable) {
+        Slice<UserReviewLabelResponse> userReviewLabelResponsePage = userReviewLabelRepository
+            .findByUserIdOrderByIdAsc(userId, pageable)
+            .map(UserMapper::toUserReviewLabelResponse);
+        return CommonMapper.toPageResponse(userReviewLabelResponsePage);
+    }
 
-	@Transactional(readOnly = true)
-	public PageResponse<UserReviewResponse> getUserReviews(Long userId, Pageable pageable) {
-		Slice<UserReviewResponse> userReviewResponsePage = reviewRepository
-			.findByAuction_Seller_IdOrderByCreatedAtDesc(userId, pageable)
-			.map(UserMapper::toUserReviewResponse);
-		return CommonMapper.toPageResponse(userReviewResponsePage);
-	}
+    public ProductCategory getProductCategoryById(Long productCategoryId) {
+        return productCategoryRepository.findById(productCategoryId)
+            .orElseThrow(() -> new NotFoundException(AuctionErrorCode.NOT_FOUND_PRODUCT_CATEGORY));
+    }
 
-	@Transactional(readOnly = true)
-	public UserProfileResponse getUserProfile(Long userId) {
-		User user = getUserById(userId);
-		List<String> preferredProductCategories = preferredProductCategoryRepository
-			.findByUser(user).stream()
-			.map(preferredProductCategory ->
-				preferredProductCategory.getProductCategory().getValue())
-			.toList();
+    @Transactional(readOnly = true)
+    public PageResponse<UserReviewResponse> getUserReviews(Long userId, Pageable pageable) {
+        Slice<UserReviewResponse> userReviewResponsePage = reviewRepository
+            .findByAuction_Seller_IdOrderByCreatedAtDesc(userId, pageable)
+            .map(UserMapper::toUserReviewResponse);
+        return CommonMapper.toPageResponse(userReviewResponsePage);
+    }
 
-		return UserProfileResponse.of(
-			userId,
-			user.getProfileImageUrl(),
-			user.getNickname(),
-			user.getAddress().getDong(),
-			preferredProductCategories,
-			user.getScore()
-		);
-	}
+    @Transactional(readOnly = true)
+    public UserProfileResponse getUserProfile(Long userId) {
+        User user = getUserById(userId);
+        List<String> preferredProductCategories = preferredProductCategoryRepository
+            .findByUser(user).stream()
+            .map(preferredProductCategory ->
+                preferredProductCategory.getProductCategory().getValue())
+            .toList();
 
-	@Transactional(readOnly = true)
-	public PageResponse<UserBuyHistoryResponse> getUserBuyHistory(
-		User user,
-		AuctionStatus auctionStatus,
-		Pageable pageable
-	) {
-		Slice<UserBuyHistoryResponse> auctionUserBuyResponsePage;
+        return UserProfileResponse.of(
+            userId,
+            user.getProfileImageUrl(),
+            user.getNickname(),
+            user.getAddress().getDong(),
+            preferredProductCategories,
+            user.getScore()
+        );
+    }
 
-		if (auctionStatus == null) {
-			auctionUserBuyResponsePage = biddingRepository
-				.findByBidderOrderByAuction_CreatedAtDesc(user, pageable)
-				.map(bidding -> UserMapper.toUserBuyHistoryResponse(bidding.getAuction()));
-		} else {
-			auctionUserBuyResponsePage = biddingRepository
-				.findByBidderAndAuction_StatusOrderByAuction_CreatedAtDesc(user, auctionStatus, pageable)
-				.map(bidding -> UserMapper.toUserBuyHistoryResponse(bidding.getAuction()));
-		}
+    @Transactional(readOnly = true)
+    public PageResponse<UserBuyHistoryResponse> getUserBuyHistory(
+        User user,
+        AuctionStatus auctionStatus,
+        Pageable pageable
+    ) {
+        Slice<UserBuyHistoryResponse> auctionUserBuyResponsePage;
 
-		return CommonMapper.toPageResponse(auctionUserBuyResponsePage);
-	}
+        if (auctionStatus == null) {
+            auctionUserBuyResponsePage = biddingRepository
+                .findByBidderOrderByAuction_CreatedAtDesc(user, pageable)
+                .map(bidding -> UserMapper.toUserBuyHistoryResponse(bidding.getAuction()));
+        } else {
+            auctionUserBuyResponsePage = biddingRepository
+                .findByBidderAndAuction_StatusOrderByAuction_CreatedAtDesc(user, auctionStatus, pageable)
+                .map(bidding -> UserMapper.toUserBuyHistoryResponse(bidding.getAuction()));
+        }
 
-	@Transactional(readOnly = true)
-	public PageResponse<UserSaleHistoryResponse> getUserSaleHistory(
-		Long userId,
-		AuctionStatus auctionStatus,
-		Pageable pageable
-	) {
-		Slice<UserSaleHistoryResponse> auctionUserSaleResponsePage;
+        return CommonMapper.toPageResponse(auctionUserBuyResponsePage);
+    }
 
-		if (auctionStatus == null) {
-			auctionUserSaleResponsePage = auctionRepository
-				.findBySeller_IdOrderByCreatedAtDesc(userId, pageable)
-				.map(UserMapper::toUserSaleHistoryResponse);
-		} else {
-			auctionUserSaleResponsePage = auctionRepository
-				.findBySeller_IdAndStatusOrderByCreatedAtDesc(userId, auctionStatus, pageable)
-				.map(UserMapper::toUserSaleHistoryResponse);
-		}
+    @Transactional(readOnly = true)
+    public PageResponse<UserSaleHistoryResponse> getUserSaleHistory(
+        Long userId,
+        AuctionStatus auctionStatus,
+        Pageable pageable
+    ) {
+        Slice<UserSaleHistoryResponse> auctionUserSaleResponsePage;
 
-		return CommonMapper.toPageResponse(auctionUserSaleResponsePage);
-	}
+        if (auctionStatus == null) {
+            auctionUserSaleResponsePage = auctionRepository
+                .findBySeller_IdOrderByCreatedAtDesc(userId, pageable)
+                .map(UserMapper::toUserSaleHistoryResponse);
+        } else {
+            auctionUserSaleResponsePage = auctionRepository
+                .findBySeller_IdAndStatusOrderByCreatedAtDesc(userId, auctionStatus, pageable)
+                .map(UserMapper::toUserSaleHistoryResponse);
+        }
+
+        return CommonMapper.toPageResponse(auctionUserSaleResponsePage);
+    }
 }

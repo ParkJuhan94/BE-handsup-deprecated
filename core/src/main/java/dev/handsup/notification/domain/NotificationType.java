@@ -7,13 +7,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum NotificationType {
 
-	CHAT("채팅 알림", "님이 회원님과의 채팅방에서 속삭이고 있어요."),
-	COMMENT("자신의 경매의 댓글 알림 알림", "님이 회원님의 경매 물품에서 얘기하고 있어요."),
-	BOOKMARK("자신의 경매의 북마크 알림", "님이 회원님의 경매 물품을 관심있어 해요."),
-	PURCHASE_WINNING("구매 입찰의 낙찰 알림", "입찰하신 물품이 낙찰되었습니다."),
-	CANCELED_PURCHASE_TRADING("구매 입찰의 거래 취소 알림", "거래가 취소되었습니다."),
-	COMPLETED_PURCHASE_TRADING("구매 입찰의 거래 완료 알림", "거래가 완료되었습니다.");
+    CHAT("채팅 알림", "님이 회원님과의 채팅방에서 속삭이고 있어요.", true),
+    COMMENT("자신의 경매의 댓글 알림 알림", "님이 회원님의 경매 물품에서 얘기하고 있어요.", true),
+    BOOKMARK("자신의 경매의 북마크 알림", "님이 회원님의 경매 물품을 관심있어 해요.", true),
+    BIDDING("자신의 경매의 입찰 등록 알림", "님이 회원님의 경매 물품에 입찰을 했어요.", true),
+    PURCHASE_WINNING("구매 입찰의 낙찰 알림", "입찰하신 물품이 낙찰되었습니다.", false),
+    CANCELED_TRADING("구매 입찰의 거래 취소 알림", "거래가 취소되었습니다.", false),
+    COMPLETED_TRADING("구매 입찰의 거래 완료 알림", "거래가 완료되었습니다.", false);
 
-	private final String title;
-	private final String content;
+    private final String title;
+    private final String content;
+    private final boolean includeSenderNickname;
+
+    public boolean includeSenderNickname() {
+        return includeSenderNickname;
+    }
 }

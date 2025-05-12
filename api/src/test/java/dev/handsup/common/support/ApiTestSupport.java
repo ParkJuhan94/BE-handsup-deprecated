@@ -1,10 +1,16 @@
 package dev.handsup.common.support;
 
-import static org.mockito.BDDMockito.*;
-import static org.springframework.http.MediaType.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.util.Arrays;
 import java.util.List;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
+import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +44,6 @@ import dev.handsup.support.TestContainerSupport;
 import dev.handsup.user.domain.User;
 import dev.handsup.user.dto.request.JoinUserRequest;
 import dev.handsup.user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
@@ -49,94 +52,101 @@ import lombok.extern.slf4j.Slf4j;
 @ExtendWith(DatabaseCleanerExtension.class)
 public abstract class ApiTestSupport extends TestContainerSupport {
 
-	protected final User user = UserFixture.user1();
-	protected String accessToken;
-	protected String refreshToken;
-	@Autowired
-	protected MockMvc mockMvc;
-	@Autowired
-	protected ObjectMapper objectMapper;
-	@Autowired
-	protected UserRepository userRepository;
-	@Autowired
-	protected AuctionRepository auctionRepository;
-	@Autowired
-	protected AuthService authService;
-	@Autowired
-	protected ProductCategoryRepository productCategoryRepository;
-	@MockBean
-	FirebaseMessaging firebaseMessaging;
+    protected static final User user = UserFixture.user1();
+    protected String accessToken;
+    protected String refreshToken;
 
-	protected String toJson(Object object) throws JsonProcessingException {
-		return objectMapper.writeValueAsString(object);
-	}
+    @Autowired
+    protected MockMvc mockMvc;
 
-	@PostConstruct
-	public void setUpUser() throws Exception {
-		// 캐싱해서 단 한번만 호출
-		if (accessToken != null && refreshToken != null) {
-			return;
-		}
+    @Autowired
+    protected ObjectMapper objectMapper;
 
-		JoinUserRequest joinUserRequest = JoinUserRequest.of(
-			user.getEmail(),
-			user.getPassword(),
-			user.getNickname(),
-			user.getAddress().getSi(),
-			user.getAddress().getGu(),
-			user.getAddress().getDong(),
-			user.getProfileImageUrl(),
-			List.of(1L)        // 선호 카테고리 id
-		);
+    @Autowired
+    protected UserRepository userRepository;
 
-		productCategoryRepository.save(ProductCategory.from(ProductCategoryValue.BEAUTY_COSMETICS.getLabel()));
+    @Autowired
+    protected AuctionRepository auctionRepository;
 
-		mockMvc.perform(
-			MockMvcRequestBuilders
-				.post("/api/users")
-				.contentType(APPLICATION_JSON)
-				.content(toJson(joinUserRequest))
-		);
+    @Autowired
+    protected AuthService authService;
 
-		LoginRequest loginRequest = LoginRequest.of(
-			user.getEmail(),
-			user.getPassword()
-		);
+    @Autowired
+    protected ProductCategoryRepository productCategoryRepository;
 
-		ApiFuture<String> mockApiFuture = mock(ApiFuture.class);
-		given(mockApiFuture.get()).willReturn("mockResponse");
-		given(firebaseMessaging.sendAsync(any(Message.class))).willReturn(mockApiFuture);
+    @MockBean
+    FirebaseMessaging firebaseMessaging;
 
-		MvcResult loginResult = mockMvc.perform(
-			MockMvcRequestBuilders
-				.post("/api/auth/login")
-				.contentType(APPLICATION_JSON)
-				.content(toJson(loginRequest))
-		).andReturn();
+    protected String toJson(Object object) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(object);
+    }
 
-		Cookie[] cookies = loginResult.getResponse().getCookies();
+    @PostConstruct
+    public void setUpUser() throws Exception {
+        // 캐싱해서 단 한번만 호출
+        if (accessToken != null && refreshToken != null) {
+            return;
+        }
 
-		String refreshTokenOfCookie = Arrays.stream(cookies)
-			.filter(cookie -> "refreshToken".equals(cookie.getName()))
-			.findFirst()
-			.map(Cookie::getValue)
-			.orElse(null);
+        JoinUserRequest joinUserRequest = JoinUserRequest.of(
+            user.getEmail(),
+            user.getPassword(),
+            user.getNickname(),
+            user.getAddress().getSi(),
+            user.getAddress().getGu(),
+            user.getAddress().getDong(),
+            user.getProfileImageUrl(),
+            List.of(1L)        // 선호 카테고리 id
+        );
 
-		if (refreshTokenOfCookie != null) {
-			refreshToken = refreshTokenOfCookie;
-		} else {
-			throw new NotFoundException(AuthErrorCode.NOT_FOUND_REFRESH_TOKEN_IN_RESPONSE);
-		}
+        productCategoryRepository.save(ProductCategory.from(ProductCategoryValue.BEAUTY_COSMETICS.getLabel()));
 
-		String stringLoginSimpleResponse = loginResult.getResponse().getContentAsString();
-		LoginSimpleResponse loginSimpleResponse = objectMapper.readValue(
-			stringLoginSimpleResponse,
-			LoginSimpleResponse.class
-		);
+        mockMvc.perform(
+            MockMvcRequestBuilders
+                .post("/api/users")
+                .contentType(APPLICATION_JSON)
+                .content(toJson(joinUserRequest))
+        );
 
-		accessToken = loginSimpleResponse.accessToken();
+        LoginRequest loginRequest = LoginRequest.of(
+            user.getEmail(),
+            user.getPassword()
+        );
 
-		log.info("setUpUser() is success.");
-	}
+        ApiFuture<String> mockApiFuture = mock(ApiFuture.class);
+        given(mockApiFuture.get()).willReturn("mockResponse");
+        given(firebaseMessaging.sendAsync(any(Message.class))).willReturn(mockApiFuture);
+
+        MvcResult loginResult = mockMvc.perform(
+            MockMvcRequestBuilders
+                .post("/api/auth/login")
+                .contentType(APPLICATION_JSON)
+                .content(toJson(loginRequest))
+        ).andReturn();
+
+        Cookie[] cookies = loginResult.getResponse().getCookies();
+
+        String refreshTokenOfCookie = Arrays.stream(cookies)
+            .filter(cookie -> "refreshToken".equals(cookie.getName()))
+            .findFirst()
+            .map(Cookie::getValue)
+            .orElse(null);
+
+        if (refreshTokenOfCookie != null) {
+            refreshToken = refreshTokenOfCookie;
+        } else {
+            throw new NotFoundException(AuthErrorCode.NOT_FOUND_REFRESH_TOKEN_IN_RESPONSE);
+        }
+
+        String stringLoginSimpleResponse = loginResult.getResponse().getContentAsString();
+        LoginSimpleResponse loginSimpleResponse = objectMapper.readValue(
+            stringLoginSimpleResponse,
+            LoginSimpleResponse.class
+        );
+
+        accessToken = loginSimpleResponse.accessToken();
+
+        log.info("setUpUser() is success.");
+    }
 
 }
