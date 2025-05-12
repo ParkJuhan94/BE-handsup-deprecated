@@ -1,18 +1,22 @@
 package dev.handsup.bidding.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
@@ -28,9 +32,12 @@ import dev.handsup.auth.service.JwtProvider;
 import dev.handsup.bidding.domain.Bidding;
 import dev.handsup.bidding.domain.TradingStatus;
 import dev.handsup.bidding.dto.request.RegisterBiddingRequest;
+import dev.handsup.bidding.event.BiddingEvent;
+import dev.handsup.bidding.event.BiddingEventListener;
+import dev.handsup.bidding.event.RegisterBiddingEventHandler;
 import dev.handsup.bidding.exception.BiddingErrorCode;
 import dev.handsup.bidding.repository.BiddingRepository;
-import dev.handsup.common.support.ApiTestSupport;
+import dev.handsup.common.support.ApiWithKafkaTestSupport;
 import dev.handsup.fixture.AuctionFixture;
 import dev.handsup.fixture.BiddingFixture;
 import dev.handsup.fixture.UserFixture;
@@ -39,9 +46,8 @@ import dev.handsup.user.domain.User;
 import dev.handsup.user.repository.UserRepository;
 
 @DisplayName("[BiddingApiController 테스트]")
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9093", "port=9093"})
-//@SpringJUnitConfig // Embedded Broker가 Test Application Context에 추가됨. -> Broker를 Autowire 해줄 수 있음.
-class BiddingApiControllerTest extends ApiTestSupport {
+@EmbeddedKafka(partitions = 1, topics = {"bidding-events"})
+class BiddingApiControllerTest extends ApiWithKafkaTestSupport {
 
     private static final User seller = user;
     private static final User bidder = UserFixture.user(2L, "bidder@naver.com");
@@ -49,24 +55,22 @@ class BiddingApiControllerTest extends ApiTestSupport {
     private String accessTokenOfBidder;
     private Auction auction1;
     private Auction auction2;
-
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
-
     @Autowired
     private BiddingRepository biddingRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private AuctionService auctionService;
-
     @Autowired
     private JwtProvider jwtProvider;
-
     @Autowired
     private FCMTokenRepository fcmTokenRepository;
+    @SpyBean
+    private BiddingEventListener biddingEventListener;
+    @SpyBean
+    private RegisterBiddingEventHandler registerBiddingEventHandler;
 
     @BeforeEach
     void setUp() {
@@ -113,6 +117,11 @@ class BiddingApiControllerTest extends ApiTestSupport {
 
         auction1 = auctionService.getAuctionById(this.auction1.getId());
         assertThat(this.auction1.getBiddingCount()).isEqualTo(beforeBiddingCount + 1);
+
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+            () -> verify(biddingEventListener, times(1)).listen(any(BiddingEvent.class)));
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+            () -> verify(registerBiddingEventHandler, times(1)).handle(any(BiddingEvent.class)));
     }
 
     @DisplayName("[[입찰 목록 전체 조회 API] 한 경매의 모든 입찰 목록을 입찰가 기준 내림차순으로 조회한다]")
