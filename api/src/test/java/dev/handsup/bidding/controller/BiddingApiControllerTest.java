@@ -34,10 +34,10 @@ import dev.handsup.bidding.domain.TradingStatus;
 import dev.handsup.bidding.dto.request.RegisterBiddingRequest;
 import dev.handsup.bidding.event.BiddingEvent;
 import dev.handsup.bidding.event.BiddingEventListener;
-import dev.handsup.bidding.event.RegisterBiddingEventHandler;
+import dev.handsup.bidding.event.BiddingRegisterEventHandler;
 import dev.handsup.bidding.exception.BiddingErrorCode;
 import dev.handsup.bidding.repository.BiddingRepository;
-import dev.handsup.common.support.ApiWithKafkaTestSupport;
+import dev.handsup.common.support.ApiTestKafkaSupport;
 import dev.handsup.fixture.AuctionFixture;
 import dev.handsup.fixture.BiddingFixture;
 import dev.handsup.fixture.UserFixture;
@@ -47,7 +47,7 @@ import dev.handsup.user.repository.UserRepository;
 
 @DisplayName("[BiddingApiController 테스트]")
 @EmbeddedKafka(partitions = 1, topics = {"bidding-events"})
-class BiddingApiControllerTest extends ApiWithKafkaTestSupport {
+class BiddingApiControllerTest extends ApiTestKafkaSupport {
 
     private static final User seller = user;
     private static final User bidder = UserFixture.user(2L, "bidder@naver.com");
@@ -70,7 +70,7 @@ class BiddingApiControllerTest extends ApiWithKafkaTestSupport {
     @SpyBean
     private BiddingEventListener biddingEventListener;
     @SpyBean
-    private RegisterBiddingEventHandler registerBiddingEventHandler;
+    private BiddingRegisterEventHandler biddingRegisterEventHandler;
 
     @BeforeEach
     void setUp() {
@@ -121,7 +121,7 @@ class BiddingApiControllerTest extends ApiWithKafkaTestSupport {
         await().atMost(3, TimeUnit.SECONDS).untilAsserted(
             () -> verify(biddingEventListener, times(1)).listen(any(BiddingEvent.class)));
         await().atMost(3, TimeUnit.SECONDS).untilAsserted(
-            () -> verify(registerBiddingEventHandler, times(1)).handle(any(BiddingEvent.class)));
+            () -> verify(biddingRegisterEventHandler, times(1)).handle(any(BiddingEvent.class)));
     }
 
     @DisplayName("[[입찰 목록 전체 조회 API] 한 경매의 모든 입찰 목록을 입찰가 기준 내림차순으로 조회한다]")

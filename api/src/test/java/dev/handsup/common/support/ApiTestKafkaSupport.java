@@ -12,7 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig // Embedded Broker가 Test Application Context에 추가됨. -> Broker를 Autowire 해줄 수 있음.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestPropertySource(properties = "event.kafka.enabled=true")
-public abstract class ApiWithKafkaTestSupport extends ApiTestSupport {
+public abstract class ApiTestKafkaSupport extends ApiTestSupport {
 
     private static String brokerAddress;
 

@@ -14,7 +14,7 @@ import dev.handsup.notification.service.FCMService;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RegisterBiddingEventHandler implements EventHandler<BiddingEvent> {
+public class BiddingRegisterEventHandler implements EventHandler<BiddingEvent> {
 
     private final FCMService fcmService;
 
