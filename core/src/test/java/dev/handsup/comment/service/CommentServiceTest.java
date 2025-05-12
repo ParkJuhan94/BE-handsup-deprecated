@@ -1,11 +1,11 @@
 package dev.handsup.comment.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +19,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import dev.handsup.auction.domain.Auction;
-import dev.handsup.auction.repository.auction.AuctionRepository;
+import dev.handsup.auction.service.AuctionService;
 import dev.handsup.comment.domain.Comment;
 import dev.handsup.comment.dto.request.RegisterCommentRequest;
 import dev.handsup.comment.dto.response.CommentResponse;
@@ -34,60 +34,63 @@ import dev.handsup.user.domain.User;
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
-	private Auction auction;
-	private User writer;
-	@Mock
-	private AuctionRepository auctionRepository;
-	@Mock
-	private CommentRepository commentRepository;
-	@Mock
-	private FCMService fcmService;
-	@InjectMocks
-	private CommentService commentService;
+    private Auction auction;
+    private User writer;
 
-	@BeforeEach
-	void setUp() {
-		auction = AuctionFixture.auction();
-		writer = UserFixture.user2();
-	}
+    @Mock
+    private AuctionService auctionService;
 
-	@DisplayName("[댓글을 등록할 수 있다.]")
-	@Test
-	void registerComment() {
-		//given
-		RegisterCommentRequest request = new RegisterCommentRequest("와");
+    @Mock
+    private CommentRepository commentRepository;
 
-		Comment comment = CommentFixture.comment(auction, writer);
-		ReflectionTestUtils.setField(comment, "createdAt", LocalDateTime.now());
+    @Mock
+    private FCMService fcmService;
 
-		given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
-		given(commentRepository.save(any(Comment.class))).willReturn(comment);
+    @InjectMocks
+    private CommentService commentService;
 
-		//when
-		CommentResponse response = commentService.registerAuctionComment(auction.getId(), request, writer);
+    @BeforeEach
+    void setUp() {
+        auction = AuctionFixture.auction();
+        writer = UserFixture.user2();
+    }
 
-		//then
-		assertThat(response).isNotNull();
-	}
+    @DisplayName("[댓글을 등록할 수 있다.]")
+    @Test
+    void registerComment() {
+        //given
+        RegisterCommentRequest request = new RegisterCommentRequest("와");
 
-	@DisplayName("[한 경매에 대한 댓글을 모두 조회할 수 있다.]")
-	@Test
-	void getAuctionComments() {
-		//given
-		PageRequest pageRequest = PageRequest.of(0, 5);
-		Comment comment = CommentFixture.comment(auction, writer);
-		ReflectionTestUtils.setField(comment, "createdAt", LocalDateTime.now());
+        Comment comment = CommentFixture.comment(auction, writer);
+        ReflectionTestUtils.setField(comment, "createdAt", LocalDateTime.now());
 
-		given(auctionRepository.findById(auction.getId()))
-			.willReturn(Optional.of(auction));
-		given(commentRepository.findByAuctionOrderByCreatedAtDesc(auction, pageRequest))
-			.willReturn(new SliceImpl<>(List.of(comment), pageRequest, false));
+        given(auctionService.getAuctionById(auction.getId())).willReturn(auction);
+        given(commentRepository.save(any(Comment.class))).willReturn(comment);
 
-		//when
-		List<CommentResponse> content = commentService.getAuctionComments(auction.getId(), pageRequest).content();
+        //when
+        CommentResponse response = commentService.registerAuctionComment(auction.getId(), request, writer);
 
-		//then
-		assertThat(content).hasSize(1);
-		assertThat(content.get(0).writerId()).isEqualTo(comment.getWriter().getId());
-	}
+        //then
+        assertThat(response).isNotNull();
+    }
+
+    @DisplayName("[한 경매에 대한 댓글을 모두 조회할 수 있다.]")
+    @Test
+    void getAuctionComments() {
+        //given
+        PageRequest pageRequest = PageRequest.of(0, 5);
+        Comment comment = CommentFixture.comment(auction, writer);
+        ReflectionTestUtils.setField(comment, "createdAt", LocalDateTime.now());
+
+        given(auctionService.getAuctionById(auction.getId())).willReturn(auction);
+        given(commentRepository.findByAuctionOrderByCreatedAtDesc(auction, pageRequest))
+            .willReturn(new SliceImpl<>(List.of(comment), pageRequest, false));
+
+        //when
+        List<CommentResponse> content = commentService.getAuctionComments(auction.getId(), pageRequest).content();
+
+        //then
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).writerId()).isEqualTo(comment.getWriter().getId());
+    }
 }
