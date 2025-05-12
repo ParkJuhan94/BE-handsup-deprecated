@@ -55,18 +55,25 @@ public abstract class ApiTestSupport extends TestContainerSupport {
     protected static final User user = UserFixture.user1();
     protected String accessToken;
     protected String refreshToken;
+
     @Autowired
     protected MockMvc mockMvc;
+
     @Autowired
     protected ObjectMapper objectMapper;
+
     @Autowired
     protected UserRepository userRepository;
+
     @Autowired
     protected AuctionRepository auctionRepository;
+
     @Autowired
     protected AuthService authService;
+
     @Autowired
     protected ProductCategoryRepository productCategoryRepository;
+
     @MockBean
     FirebaseMessaging firebaseMessaging;
 
