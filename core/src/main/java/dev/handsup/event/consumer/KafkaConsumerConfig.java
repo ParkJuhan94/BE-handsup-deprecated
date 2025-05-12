@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -14,10 +15,11 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import dev.handsup.event.common.BiddingEvent;
+import dev.handsup.bidding.event.BiddingEvent;
 
 @EnableKafka
 @Configuration
+@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true", matchIfMissing = false)
 public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.producer.bootstrap-servers}")
