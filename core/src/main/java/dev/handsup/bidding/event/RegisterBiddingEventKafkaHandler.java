@@ -1,29 +1,30 @@
-package dev.handsup.event.consumer;
+package dev.handsup.bidding.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import dev.handsup.event.common.BiddingEvent;
+import dev.handsup.bidding.event.BiddingEvent.BiddingEventType;
+import dev.handsup.event.consumer.EventHandler;
 import dev.handsup.notification.domain.NotificationType;
 import dev.handsup.notification.service.FCMService;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BiddingEventConsumer {
+public class RegisterBiddingEventKafkaHandler implements EventHandler<BiddingEvent> {
 
     private final FCMService fcmService;
 
-    @KafkaListener(
-        topics = "bidding-events",
-        groupId = "bidding-consumer-group",
-        containerFactory = "biddingKafkaListenerContainerFactory"
-    )
-    public void listen(@Payload BiddingEvent event) {
+    @Override
+    public boolean supports(BiddingEvent event) {
+        return event.biddingEventType() == BiddingEventType.REGISTERED;
+    }
+
+    @Override
+    public void handle(@Payload BiddingEvent event) {
         fcmService.sendMessage(
             event.bidderEmail(),
             event.bidderNickname(),
