@@ -15,6 +15,7 @@ import dev.handsup.bidding.domain.Bidding;
 import dev.handsup.bidding.dto.BiddingMapper;
 import dev.handsup.bidding.dto.request.RegisterBiddingRequest;
 import dev.handsup.bidding.dto.response.BiddingResponse;
+import dev.handsup.bidding.event.BiddingEvent.BiddingEventType;
 import dev.handsup.bidding.exception.BiddingErrorCode;
 import dev.handsup.bidding.repository.BiddingQueryRepository;
 import dev.handsup.bidding.repository.BiddingRepository;
@@ -49,7 +50,7 @@ public class BiddingService {
         auction.increaseBiddingCount();
 
         Bidding savedBidding = biddingRepository.save(BiddingMapper.toBidding(biddingPrice, auction, bidder));
-        eventPublisher.publishEvent(BiddingMapper.toBiddingEvent(savedBidding));
+        eventPublisher.publishEvent(BiddingMapper.toBiddingEvent(savedBidding, BiddingEventType.REGISTERED));
 
         return BiddingMapper.toBiddingResponse(savedBidding);
     }

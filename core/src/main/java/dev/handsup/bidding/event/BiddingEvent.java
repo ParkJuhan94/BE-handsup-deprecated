@@ -1,10 +1,12 @@
-package dev.handsup.event.common;
+package dev.handsup.bidding.event;
 
 import static lombok.AccessLevel.PRIVATE;
 
 import java.time.LocalDateTime;
 
 import lombok.Builder;
+
+import dev.handsup.event.common.DomainEvent;
 
 @Builder(access = PRIVATE)
 public record BiddingEvent(
@@ -15,9 +17,9 @@ public record BiddingEvent(
     String bidderEmail,
     String bidderNickname,
     int biddingPrice,
-    LocalDateTime createdAt,
-    EventType eventType
-) {
+    BiddingEventType biddingEventType,
+    LocalDateTime createdAt
+) implements DomainEvent {
 
     public static BiddingEvent of(
         Long auctionId,
@@ -27,7 +29,8 @@ public record BiddingEvent(
         String bidderEmail,
         String bidderNickname,
         int biddingPrice,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        BiddingEventType biddingEventType
     ) {
         return BiddingEvent.builder()
             .auctionId(auctionId)
@@ -38,15 +41,11 @@ public record BiddingEvent(
             .bidderNickname(bidderNickname)
             .biddingPrice(biddingPrice)
             .createdAt(createdAt)
+            .biddingEventType(biddingEventType)
             .build();
     }
 
-    /***
-     * 컨슈머 쪽에서 switch(event.eventType())으로 분기 처리
-     * 로그/알림 시스템에서 특정 이벤트만 필터링 가능
-     * 다른 도메인 이벤트랑 섞어서 공통 Kafka Topic으로 보낼 수도 있음
-     */
-    public enum EventType {
+    public enum BiddingEventType {
         REGISTERED,  // 입찰 등록
         CANCELED,    // 거래 취소
         COMPLETED    // 거래 완료

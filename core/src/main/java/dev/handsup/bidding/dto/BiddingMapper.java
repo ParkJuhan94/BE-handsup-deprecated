@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import dev.handsup.auction.domain.Auction;
 import dev.handsup.bidding.domain.Bidding;
 import dev.handsup.bidding.dto.response.BiddingResponse;
-import dev.handsup.event.common.BiddingEvent;
+import dev.handsup.bidding.event.BiddingEvent;
+import dev.handsup.bidding.event.BiddingEvent.BiddingEventType;
 import dev.handsup.user.domain.User;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -34,7 +35,7 @@ public class BiddingMapper {
         );
     }
 
-    public static BiddingEvent toBiddingEvent(Bidding bidding) {
+    public static BiddingEvent toBiddingEvent(Bidding bidding, BiddingEventType biddingEventType) {
         Auction auction = bidding.getAuction();
         User bidder = bidding.getBidder();
 
@@ -46,7 +47,8 @@ public class BiddingMapper {
             bidder.getEmail(),
             bidder.getNickname(),
             bidding.getBiddingPrice(),
-            bidding.getCreatedAt()
+            bidding.getCreatedAt(),
+            biddingEventType
         );
     }
 }
