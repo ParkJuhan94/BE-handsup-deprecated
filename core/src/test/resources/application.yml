@@ -8,9 +8,7 @@ spring:
         default_batch_fetch_size: 10
   kafka:
     producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    topic:
-      name: handsup-topic
+      bootstrap-servers: localhost:9092
 
 logging.level:
   org.hibernate.SQL: debug
