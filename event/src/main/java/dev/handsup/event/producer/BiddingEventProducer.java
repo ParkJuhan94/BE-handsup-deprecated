@@ -1,10 +1,11 @@
-package dev.handsup.bidding.event;
+package dev.handsup.event.producer;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import dev.handsup.bidding.event.BiddingEvent;
 
 @Component
 @RequiredArgsConstructor

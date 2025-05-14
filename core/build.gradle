@@ -29,9 +29,6 @@ dependencies {
     // --- FCM (Firebase) ---
     implementation 'com.google.firebase:firebase-admin:9.2.0'
 
-    // --- Kafka ---
-    implementation 'org.springframework.kafka:spring-kafka'
-
     // --- QueryDSL ---
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"

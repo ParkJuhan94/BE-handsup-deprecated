@@ -1,6 +1,6 @@
-package dev.handsup.event.consumer;
+package dev.handsup.event.common;
 
-import dev.handsup.event.common.DomainEvent;
+import dev.handsup.common.event.DomainEvent;
 
 public interface EventHandler<T extends DomainEvent> {
 

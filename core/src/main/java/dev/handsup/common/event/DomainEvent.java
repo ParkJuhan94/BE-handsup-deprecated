@@ -1,4 +1,4 @@
-package dev.handsup.event.common;
+package dev.handsup.common.event;
 
 public interface DomainEvent {
 

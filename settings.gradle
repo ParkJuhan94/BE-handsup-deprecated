@@ -2,3 +2,4 @@ rootProject.name = 'BE-handsup'
 
 include 'api'
 include 'core'
+include 'event'

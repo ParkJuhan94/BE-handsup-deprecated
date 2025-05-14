@@ -1,15 +1,15 @@
-package dev.handsup.bidding.event;
+package dev.handsup.event.consumer;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import dev.handsup.bidding.event.BiddingEvent;
+import dev.handsup.event.producer.BiddingEventProducer;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true", matchIfMissing = false)

@@ -1,4 +1,4 @@
-package dev.handsup.bidding.event;
+package dev.handsup.event.consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,15 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import dev.handsup.bidding.event.BiddingEvent;
 import dev.handsup.bidding.event.BiddingEvent.BiddingEventType;
-import dev.handsup.event.consumer.EventHandler;
+import dev.handsup.event.common.EventHandler;
 import dev.handsup.notification.domain.NotificationType;
 import dev.handsup.notification.service.FCMService;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BiddingRegisterEventHandler implements EventHandler<BiddingEvent> {
+public class RegisterBiddingEventKafkaHandler implements EventHandler<BiddingEvent> {
 
     private final FCMService fcmService;
 
