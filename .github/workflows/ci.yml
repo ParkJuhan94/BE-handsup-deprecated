@@ -2,7 +2,7 @@ name: ⚙️ CI Backend
 
 on:
   pull_request:
-    branches: ["main", "dev"]
+    branches: [ "main", "dev" ]
 
 permissions:
   contents: read
@@ -67,7 +67,7 @@ jobs:
           distribution: 'temurin'
 
       # firebase json 파일 생성
-      - name : Generate firebase_account.json
+      - name: Generate firebase_account.json
         run: |
           mkdir -p ./core/src/main/resources/firebase
           echo "${{ secrets.FIREBASE_ACCOUNT }}" | base64 -d > ./core/src/main/resources/firebase/firebase_account.json          
@@ -109,3 +109,5 @@ jobs:
         if: always()
         with:
           report_paths: '**/build/test-results/test/TEST-*.html'
+
+
