@@ -12,6 +12,8 @@ spring:
       bootstrap-servers: ${spring.embedded.kafka.brokers}
     consumer:
       bootstrap-servers: ${spring.embedded.kafka.brokers}
+    admin:
+      bootstrap-servers: ${spring.embedded.kafka.brokers}
 event:
   kafka:
     enabled: false
