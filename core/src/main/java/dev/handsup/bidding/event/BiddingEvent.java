@@ -1,12 +1,12 @@
 package dev.handsup.bidding.event;
 
-import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.*;
 
 import java.time.LocalDateTime;
 
 import lombok.Builder;
 
-import dev.handsup.event.common.DomainEvent;
+import dev.handsup.common.event.DomainEvent;
 
 @Builder(access = PRIVATE)
 public record BiddingEvent(
