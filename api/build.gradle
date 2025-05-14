@@ -1,6 +1,7 @@
 dependencies {
-    // --- Core 모듈 ---
+    // --- 다른 모듈 ---
     implementation project(path: ':core')
+    implementation project(path: ':event')
     testImplementation(testFixtures(project(':core')))
 
     // --- Spring Boot Starters ---
