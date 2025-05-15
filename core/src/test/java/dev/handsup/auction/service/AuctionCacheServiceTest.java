@@ -1,9 +1,8 @@
 package dev.handsup.auction.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +32,7 @@ import dev.handsup.auction.exception.AuctionErrorCode;
 import dev.handsup.auction.repository.auction.AuctionQueryRepository;
 import dev.handsup.common.dto.PageResponse;
 import dev.handsup.common.exception.NotFoundException;
-import dev.handsup.common.util.CacheKeyGenerator;
+import dev.handsup.common.util.KeyGenerator;
 import dev.handsup.fixture.AuctionFixture;
 import dev.handsup.fixture.UserFixture;
 import dev.handsup.user.domain.User;
@@ -73,7 +72,7 @@ class AuctionCacheServiceTest {
             0, 5, Sort.by("BOOKMARK")
         );
 
-        key = CacheKeyGenerator.recommendAuctionsKey(
+        key = KeyGenerator.generateRecommendAuctionsKey(
             auction1.getTradingLocation().getSi(),
             auction1.getTradingLocation().getGu(),
             auction1.getTradingLocation().getDong(),
