@@ -1,6 +1,8 @@
 package dev.handsup.bidding.dto;
 
-import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.*;
+
+import java.util.UUID;
 
 import lombok.NoArgsConstructor;
 
@@ -38,8 +40,10 @@ public class BiddingMapper {
     public static BiddingEvent toBiddingEvent(Bidding bidding, BiddingEventType biddingEventType) {
         Auction auction = bidding.getAuction();
         User bidder = bidding.getBidder();
+        String eventId = UUID.randomUUID().toString();
 
         return BiddingEvent.of(
+            eventId,
             auction.getId(),
             auction.getSeller().getEmail(),
             bidding.getId(),
