@@ -10,6 +10,7 @@ import dev.handsup.common.event.DomainEvent;
 
 @Builder(access = PRIVATE)
 public record BiddingEvent(
+    String eventId,
     Long auctionId,
     String sellerEmail,
     Long biddingId,
@@ -22,6 +23,7 @@ public record BiddingEvent(
 ) implements DomainEvent {
 
     public static BiddingEvent of(
+        String eventId,
         Long auctionId,
         String sellerEmail,
         Long biddingId,
@@ -33,6 +35,7 @@ public record BiddingEvent(
         BiddingEventType biddingEventType
     ) {
         return BiddingEvent.builder()
+            .eventId(eventId)
             .auctionId(auctionId)
             .sellerEmail(sellerEmail)
             .biddingId(biddingId)

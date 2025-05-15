@@ -1,7 +1,7 @@
 package dev.handsup.auction.repository.search;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ import dev.handsup.support.TestContainerSupport;
 @DisplayName("[RedisSearch Repository 테스트]")
 @Import(RedisSearchRepository.class)
 @DataRedisTest
-class RedisSearchReposi서toryTest extends TestContainerSupport {
+class RedisSearchRepositoryTest extends TestContainerSupport {
 
     @Autowired
     private RedisSearchRepository repository;

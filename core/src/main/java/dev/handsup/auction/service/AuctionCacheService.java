@@ -19,7 +19,7 @@ import dev.handsup.auction.repository.auction.AuctionQueryRepository;
 import dev.handsup.common.dto.CommonMapper;
 import dev.handsup.common.dto.PageResponse;
 import dev.handsup.common.exception.NotFoundException;
-import dev.handsup.common.util.CacheKeyGenerator;
+import dev.handsup.common.util.KeyGenerator;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class AuctionCacheService {
             throw new NotFoundException(AuctionErrorCode.EMPTY_SORT_INPUT);
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.by(sort)));
-        String key = CacheKeyGenerator.recommendAuctionsKey(si, gu, dong, pageable);
+        String key = KeyGenerator.generateRecommendAuctionsKey(si, gu, dong, pageable);
 
         // 1. Caffeine 조회
         PageResponse<RecommendAuctionResponse> cached = caffeineCache.getIfPresent(key);
