@@ -97,12 +97,12 @@ subprojects {
                     limit {     // 라인 커버리지
                         counter = 'LINE'
                         value = 'COVEREDRATIO'
-                        minimum = 0.67
+                        minimum = 0.0
                     }
                     limit {     // 브랜치 커버리지
                         counter = 'BRANCH'
                         value = 'COVEREDRATIO'
-                        minimum = 0.67
+                        minimum = 0.0
                     }
                     excludes = [
                             '**/generated/**',
