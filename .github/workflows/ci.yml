@@ -96,6 +96,20 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      # JaCoCo 테스트 및 리포트 생성
+      - name: Build and test with JaCoCo
+        run: ./gradlew clean test jacocoTestReport
+
+      # Codecov 업로드
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: '**/build/reports/jacoco/test/jacocoTestReport.xml'
+          flags: unittests
+          name: codecov-coverage
+          fail_ci_if_error: false
+
       # 테스트 결과 PR 코멘트에 등록
       - name: Register the test results as PR comments
         uses: EnricoMi/publish-unit-test-result-action@v2
