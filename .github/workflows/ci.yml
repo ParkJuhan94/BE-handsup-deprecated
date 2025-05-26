@@ -56,6 +56,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Docker images 미리 pull
+      - name: Pull MySQL, Redis, Zookeeper, Kafka images
+        run: |
+          docker pull mysql:8.0
+          docker pull redis:latest
+          docker pull wurstmeister/zookeeper
+          docker pull wurstmeister/kafka
+
       - name: Check the timezone
         run: date
 
@@ -94,11 +102,11 @@ jobs:
 
       # 빌드
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --build-cache --parallel
 
       # JaCoCo 테스트 및 리포트 생성
       - name: Build and test with JaCoCo
-        run: ./gradlew clean test jacocoTestReport
+        run: ./gradlew test jacocoTestReport
 
       # Codecov 업로드
       - name: Upload coverage to Codecov
