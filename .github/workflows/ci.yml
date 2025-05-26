@@ -56,14 +56,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Docker images 미리 pull
-      - name: Pull MySQL, Redis, Zookeeper, Kafka images
-        run: |
-          docker pull mysql:8.0
-          docker pull redis:latest
-          docker pull wurstmeister/zookeeper
-          docker pull wurstmeister/kafka
-
       - name: Check the timezone
         run: date
 
