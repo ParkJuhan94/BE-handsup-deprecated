@@ -20,7 +20,7 @@ subprojects {
     apply { plugin('java') }
     apply { plugin('org.springframework.boot') }
     apply { plugin('io.spring.dependency-management') }
-    apply { plugin('java-test-fixtures')}
+    apply { plugin('java-test-fixtures') }
 
     dependencies {
         compileOnly 'org.projectlombok:lombok'
@@ -35,11 +35,95 @@ subprojects {
     }
 
     tasks.named('bootJar') {
-        enabled = false
-        //루트에서는 스프링부트가 필요하지 않음; 실제 플러그인은 서브 프로젝트에서 명시적 적용
+        enabled = false     //루트에서는 스프링부트가 필요하지 않음; 실제 플러그인은 서브 프로젝트에서 명시적 적용
     }
 
     tasks.named('jar') {
         enabled = true
+    }
+
+    // --- Setting Up JaCoCo ---
+    if (project.name == 'core' || project.name == 'api') {
+        apply plugin: 'jacoco'
+
+        jacoco {
+            toolVersion = "0.8.13"
+            reportsDirectory = layout.buildDirectory.dir('jacocoReport')
+        }
+
+        test {
+            useJUnitPlatform()
+//            finalizedBy jacocoTestReport    // test 실행 후 report 생성
+        }
+
+        jacocoTestReport {
+            dependsOn test
+            reports {
+                xml.required.set(true)  // Codecov 같은 연동 툴은 xml 필요
+                html.required.set(true) // 로컬에서 예쁜 리포트 보려면 html도 생성
+                csv.required.set(false)
+            }
+            afterEvaluate {     // 커버리지 검증에서 제외할 경로
+                classDirectories.setFrom(files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+                            '**/generated/**',                 // QueryDSL Q 클래스 경로 (api, core 모두 공통)
+                            '**/dto/**',                       // DTO들 (요청/응답 전용 클래스)
+                            '**/event/**',                     // event 모듈도 메시지 처리용 클래스 많음
+                            '**/*Application*',                // Spring Boot 메인 클래스
+                            '**/exception/**',                 // Exception 처리
+                            '**/config/**',                    // Config 설정 클래스
+                            '**/aop/**',                       // AOP 관련 클래스
+                            '**/initializer/**',               // DummyInitializer 등 초기 데이터 셋팅
+                            '**/scheduler/**',                 // 스케줄러
+                            '**/support/**',                   // Test Support 유틸
+                            '**/*Mapper*',                     // MapStruct 나 Mapper 관련
+                            '**/*ErrorCode*',                  // ErrorCode enum/클래스
+                            '**/*SwaggerDoc*',                 // Swagger 문서 정의용 클래스
+                            '**/*Request*',                    // Request DTO
+                            '**/*Response*',                   // Response DTO
+                            '**/*Fixture*'                     // Test Fixture
+                    ])
+                }))
+            }
+            finalizedBy 'jacocoTestCoverageVerification'    // 이후에 jacocoTestCoverageVerification 실행되도록
+        }
+
+        jacocoTestCoverageVerification {
+            violationRules {
+                rule {
+                    enabled = true
+                    element = 'CLASS'
+
+                    limit {     // 라인 커버리지
+                        counter = 'LINE'
+                        value = 'COVEREDRATIO'
+                        minimum = 0.0
+                    }
+                    limit {     // 브랜치 커버리지
+                        counter = 'BRANCH'
+                        value = 'COVEREDRATIO'
+                        minimum = 0.0
+                    }
+                    excludes = [
+                            '**/generated/**',
+                            '**/dto/**',
+                            '**/event/**',
+                            '**/*Application*',
+                            '**/exception/**',
+                            '**/config/**',
+                            '**/aop/**',
+                            '**/initializer/**',
+                            '**/scheduler/**',
+                            '**/support/**',
+                            '**/*Mapper*',
+                            '**/*ErrorCode*',
+                            '**/*SwaggerDoc*',
+                            '**/*Request*',
+                            '**/*Response*',
+                            '**/*Fixture*'
+                    ]
+                }
+            }
+        }
     }
 }
