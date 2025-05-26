@@ -42,6 +42,10 @@ subprojects {
         enabled = true
     }
 
+    tasks.withType(Test).configureEach {   // Gradle 테스트 병렬화
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2)
+    }
+
     // --- Setting Up JaCoCo ---
     if (project.name == 'core' || project.name == 'api') {
         apply plugin: 'jacoco'

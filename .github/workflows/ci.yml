@@ -54,19 +54,21 @@ jobs:
       #      AWS_REGION: ${{ secrets.AWS_REGION }}
       #      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
     steps:
+      # 1. 체크아웃
       - uses: actions/checkout@v3
 
+      # 2. 시간 설정
       - name: Check the timezone
         run: date
 
-      # 자바 버전 설정
+      # 3. 자바 버전 설정
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # firebase json 파일 생성
+      # 4. firebase json 파일 생성
       - name: Generate firebase_account.json
         run: |
           mkdir -p ./core/src/main/resources/firebase
@@ -76,12 +78,12 @@ jobs:
           mkdir -p ./api/src/test/resources/firebase
           echo "${{ secrets.FIREBASE_ACCOUNT }}" | base64 -d > ./api/src/test/resources/firebase/firebase_account.json
 
-      # gradle 권한 부여
+      # 5. gradle 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
         shell: bash
 
-      # 빌드 시 캐시 적용
+      # 6. 빌드 시 캐시 적용
       - name: Gradle Caching
         uses: actions/cache@v3
         with:
@@ -92,15 +94,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 빌드
+      # 7. 빌드
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --build-cache --parallel
 
-      # JaCoCo 테스트 및 리포트 생성
+      # 8. JaCoCo 테스트 및 리포트 생성
       - name: Build and test with JaCoCo
-        run: ./gradlew clean test jacocoTestReport
+        run: ./gradlew test jacocoTestReport
 
-      # Codecov 업로드
+      # 9. Codecov 업로드
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -110,18 +112,16 @@ jobs:
           name: codecov-coverage
           fail_ci_if_error: false
 
-      # 테스트 결과 PR 코멘트에 등록
+      # 10. 테스트 결과 PR 코멘트에 등록
       - name: Register the test results as PR comments
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           files: '**/build/test-results/test/TEST-*.xml'
 
-      # 테스트 실패시 코드 라인에 대한 체크 추가
+      # 11. 테스트 실패시 코드 라인에 대한 체크 추가
       - name: If test fail, add check comment on failed code line
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
           report_paths: '**/build/test-results/test/TEST-*.html'
-
-
