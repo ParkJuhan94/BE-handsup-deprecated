@@ -112,6 +112,7 @@ jobs:
           flags: unittests
           name: codecov-coverage
           token: ${{ secrets.CODECOV_TOKEN }}
+          sha: ${{ github.event.pull_request.head.sha }}
 
       # 10. 테스트 결과 PR 코멘트에 등록
       - name: Register the test results as PR comments
