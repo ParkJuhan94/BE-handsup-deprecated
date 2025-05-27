@@ -102,16 +102,15 @@ jobs:
       - name: Generate JaCoCo Report
         run: ./gradlew jacocoTestReport
 
+      - name: Verify coverage files
+        run: find . -name "jacocoTestReport.xml"
+
       # 9. CodeCov 업로드
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          # TODO  !!!
-          #          files: '**/build/jacocoReport/test/jacocoTestReport.xml'
-          files: |
-            api/build/jacocoReport/test/jacocoTestReport.xml
-            core/build/jacocoReport/test/jacocoTestReport.xml
+          files: '**/build/jacocoReport/test/jacocoTestReport.xml'
           flags: unittests
           name: codecov-coverage
           fail_ci_if_error: false
