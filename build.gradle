@@ -57,7 +57,7 @@ subprojects {
 
         test {
             useJUnitPlatform()
-//            finalizedBy jacocoTestReport    // test 실행 후 report 생성
+//            finalizedBy jacocoTestReport
         }
 
         jacocoTestReport {
@@ -89,7 +89,7 @@ subprojects {
                     ])
                 }))
             }
-            finalizedBy 'jacocoTestCoverageVerification'    // 이후에 jacocoTestCoverageVerification 실행되도록
+            finalizedBy 'jacocoTestCoverageVerification'    // jacocoTestCoverageVerification 실행 후 report 생성
         }
 
         jacocoTestCoverageVerification {
