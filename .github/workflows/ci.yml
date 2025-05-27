@@ -98,16 +98,20 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --build-cache --parallel
 
-      # 8. JaCoCo 테스트 및 리포트 생성
-      - name: Build and test with JaCoCo
-        run: ./gradlew test jacocoTestReport
+      # 8. JaCoCo 리포트 생성
+      - name: Generate JaCoCo Report
+        run: ./gradlew jacocoTestReport
 
       # 9. CodeCov 업로드
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: '**/build/jacocoReport/test/jacocoTestReport.xml'
+          # TODO  !!!
+          #          files: '**/build/jacocoReport/test/jacocoTestReport.xml'
+          files: |
+            api/build/jacocoReport/test/jacocoTestReport.xml
+            core/build/jacocoReport/test/jacocoTestReport.xml
           flags: unittests
           name: codecov-coverage
           fail_ci_if_error: false
