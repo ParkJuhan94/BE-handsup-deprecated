@@ -102,9 +102,6 @@ jobs:
       - name: Generate JaCoCo Report
         run: ./gradlew jacocoTestReport
 
-      - name: Verify coverage files
-        run: find . -name "jacocoTestReport.xml"
-
       # 9. CodeCov 업로드
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
