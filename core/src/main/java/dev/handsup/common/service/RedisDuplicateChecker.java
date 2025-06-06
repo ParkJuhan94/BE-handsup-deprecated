@@ -1,5 +1,7 @@
 package dev.handsup.common.service;
 
+import static java.lang.Boolean.*;
+
 import java.time.Duration;
 
 import lombok.RequiredArgsConstructor;
@@ -15,20 +17,20 @@ import dev.handsup.common.util.KeyGenerator;
 @RequiredArgsConstructor
 public class RedisDuplicateChecker {
 
-    private static final long TTL = 60 * 5L; // 5분
+    private static final long TTL = 60 * 30L; // 30분
     private final StringRedisTemplate redisTemplate;
 
-    public boolean isDuplicate(String eventId) {
+    public boolean checkDuplicateAndCacheIfAbsent(String eventId) {
         String key = KeyGenerator.generateBiddingEventKey(eventId);
-        Boolean success = redisTemplate.opsForValue()
+        Boolean isNewKeyCreated = redisTemplate.opsForValue()
             .setIfAbsent("event:" + eventId, "1", Duration.ofSeconds(TTL));
 
-        if (Boolean.TRUE.equals(success)) {
-            log.debug("✅ Redis key created: {}", key);
+        if (TRUE.equals(isNewKeyCreated)) {
+            log.debug("Redis 키 생성 완료: key={}", key);
         } else {
-            log.debug("🚨 Redis key already exists (duplicate): {}", key);
+            log.info("Redis 키 중복: key={}", key);
         }
 
-        return success == Boolean.FALSE; // 이미 있으면 true
+        return FALSE.equals(isNewKeyCreated);
     }
 }

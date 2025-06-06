@@ -31,3 +31,7 @@ cloud:
 
 fcm:
   certification: firebase/firebase_account.json
+
+notification:
+  slack:
+    webhook-url: https://hooks.slack.com/services/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

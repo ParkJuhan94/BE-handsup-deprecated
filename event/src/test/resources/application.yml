@@ -1,6 +1,5 @@
 spring:
   jpa:
-    show-sql: false
     hibernate:
       ddl-auto: create
     properties:
@@ -9,18 +8,16 @@ spring:
         default_batch_fetch_size: 10
   kafka:
     producer:
-      bootstrap-servers: ${spring.embedded.kafka.brokers}
-    consumer:
-      bootstrap-servers: ${spring.embedded.kafka.brokers}
-    admin:
-      bootstrap-servers: ${spring.embedded.kafka.brokers}
-event:
-  kafka:
-    enabled: false
-logging.level:
-  root: WARN
-  org.hibernate.SQL: debug
-  org.hibernate.orm.jdbc.bind: trace
+      bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    root: info
+    org.springframework: info
+    org.hibernate: info
+    org.hibernate.SQL: debug
+    org.hibernate.tool.hbm2ddl: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
 
 jwt:
   secret: prgrmsdevcoursehandsupjsonwebtokensecretkeytest123
@@ -39,7 +36,3 @@ cloud:
 
 fcm:
   certification: firebase/firebase_account.json
-
-notification:
-  slack:
-    webhook-url: https://hooks.slack.com/services/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

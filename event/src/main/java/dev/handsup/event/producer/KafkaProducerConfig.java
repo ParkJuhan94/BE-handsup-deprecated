@@ -17,7 +17,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import dev.handsup.bidding.event.BiddingEvent;
 
 @Configuration
-@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true")
 public class KafkaProducerConfig {
 
     @Value("${spring.kafka.producer.bootstrap-servers}")
