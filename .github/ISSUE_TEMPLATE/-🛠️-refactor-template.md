@@ -1,7 +1,7 @@
 ---
 name: " \U0001F6E0️ Refactor Template"
 about: 리팩토링
-title: "[refactor] : "
+title: 'refactor:  '
 labels: refactor
 assignees: ParkJuhan94
 

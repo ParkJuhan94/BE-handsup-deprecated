@@ -1,7 +1,7 @@
 ---
 name: "\U0001F41E Fix Template"
 about: 오류 수정
-title: "[fix] : "
+title: 'fix: '
 labels: fix
 assignees: ParkJuhan94
 

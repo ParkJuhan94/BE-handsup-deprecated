@@ -1,7 +1,7 @@
 ---
 name: "\U0001F3A8 Design/Discussion Template"
 about: 구조 설계, 방향성 논의
-title: "[design/discussion] : "
+title: 'design/discussion: '
 labels: design/discussion
 assignees: ParkJuhan94
 

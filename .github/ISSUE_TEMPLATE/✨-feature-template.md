@@ -1,7 +1,7 @@
 ---
 name: "✨ Feature Template"
 about: 기능 추가 및 개선
-title: "[feat] : "
+title: 'feat: '
 labels: feat
 assignees: ParkJuhan94
 

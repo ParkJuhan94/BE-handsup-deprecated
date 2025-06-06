@@ -1,7 +1,7 @@
 ---
 name: "✅ Test Code Template"
 about: 테스트 코드 추가/수정 등
-title: "[test] : "
+title: 'test: '
 labels: test
 assignees: ParkJuhan94
 

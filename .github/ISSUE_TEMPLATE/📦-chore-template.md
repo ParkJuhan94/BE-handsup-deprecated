@@ -1,7 +1,7 @@
 ---
 name: "\U0001F4E6 Chore Template"
 about: 코드 로직을 직접 변경하지 않는 모든 관리/운영/유지보수 관련 작업
-title: "[chore] : "
+title: 'chore: '
 labels: chore
 assignees: ParkJuhan94
 
