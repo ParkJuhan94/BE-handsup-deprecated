@@ -1,0 +1,38 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 10
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    root: info
+    org.springframework: info
+    org.hibernate: info
+    org.hibernate.SQL: debug
+    org.hibernate.tool.hbm2ddl: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+jwt:
+  secret: prgrmsdevcoursehandsupjsonwebtokensecretkeytest123
+  token-validity-in-seconds: 1800
+cloud:
+  aws:
+    credentials:
+      access-key: s3-access-key
+      secret-key: s3-secret-key
+    region:
+      static: s3-region
+    s3:
+      bucket: s3-bucket-name
+    stack:
+      auto: false
+
+fcm:
+  certification: firebase/firebase_account.json

@@ -1,8 +1,10 @@
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // --- Core 모듈 ---
     implementation project(path: ':core')
+    testImplementation(testFixtures(project(':core')))
 
     // --- Kafka ---
     implementation 'org.springframework.kafka:spring-kafka:3.1.1'
