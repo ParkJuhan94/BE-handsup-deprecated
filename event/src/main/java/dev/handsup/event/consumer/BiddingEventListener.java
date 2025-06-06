@@ -12,7 +12,7 @@ import dev.handsup.event.producer.BiddingEventProducer;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true")
 public class BiddingEventListener {
 
     private final BiddingEventProducer biddingEventProducer;

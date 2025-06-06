@@ -21,7 +21,7 @@ import dev.handsup.bidding.event.BiddingEvent;
 
 @EnableKafka
 @Configuration
-@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true")
 public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.consumer.bootstrap-servers}")
