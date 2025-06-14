@@ -5,7 +5,6 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import dev.handsup.common.entity.TimeBaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -17,44 +16,46 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import dev.handsup.common.domain.TimeBaseEntity;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 public class ChatMessage extends TimeBaseEntity {
 
-	@Id
-	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "chat_message_id")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "chat_message_id")
+    private Long id;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "chat_room_id",
-		nullable = false,
-		foreignKey = @ForeignKey(NO_CONSTRAINT))
-	private ChatRoom chatRoom;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "chat_room_id",
+        nullable = false,
+        foreignKey = @ForeignKey(NO_CONSTRAINT))
+    private ChatRoom chatRoom;
 
-	@Column(name = "sender_id")
-	private Long senderId;
+    @Column(name = "sender_id")
+    private Long senderId;
 
-	@Column(name = "content", nullable = false)
-	private String content;
+    @Column(name = "content", nullable = false)
+    private String content;
 
-	@Column(name = "is_read", nullable = false)
-	private Boolean isRead;
+    @Column(name = "is_read", nullable = false)
+    private Boolean isRead;
 
-	@Builder
-	private ChatMessage(ChatRoom chatRoom, Long senderId, String content) {
-		this.chatRoom = chatRoom;
-		this.senderId = senderId;
-		this.content = content;
-		this.isRead = false;
-	}
+    @Builder
+    private ChatMessage(ChatRoom chatRoom, Long senderId, String content) {
+        this.chatRoom = chatRoom;
+        this.senderId = senderId;
+        this.content = content;
+        this.isRead = false;
+    }
 
-	public static ChatMessage of(ChatRoom chatRoom, Long senderId, String content) {
-		return ChatMessage.builder()
-			.chatRoom(chatRoom)
-			.senderId(senderId)
-			.content(content)
-			.build();
-	}
+    public static ChatMessage of(ChatRoom chatRoom, Long senderId, String content) {
+        return ChatMessage.builder()
+            .chatRoom(chatRoom)
+            .senderId(senderId)
+            .content(content)
+            .build();
+    }
 }

@@ -1,4 +1,4 @@
-package dev.handsup.common.entity;
+package dev.handsup.kafka.domain;
 
 import static lombok.AccessLevel.*;
 
@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import dev.handsup.common.domain.TimeBaseEntity;
 
 @Entity
 @Getter

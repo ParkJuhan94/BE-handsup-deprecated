@@ -5,8 +5,6 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import dev.handsup.common.entity.TimeBaseEntity;
-import dev.handsup.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -18,50 +16,53 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import dev.handsup.common.domain.TimeBaseEntity;
+import dev.handsup.user.domain.User;
+
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 public class UserReviewLabel extends TimeBaseEntity {
 
-	@Id
-	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "user_review_label_id")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "user_review_label_id")
+    private Long id;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "review_label_id",
-		nullable = false,
-		foreignKey = @ForeignKey(NO_CONSTRAINT))
-	private ReviewLabel reviewLabel;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "review_label_id",
+        nullable = false,
+        foreignKey = @ForeignKey(NO_CONSTRAINT))
+    private ReviewLabel reviewLabel;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "user_id",
-		nullable = false,
-		foreignKey = @ForeignKey(NO_CONSTRAINT))
-	private User user;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(NO_CONSTRAINT))
+    private User user;
 
-	@Column(name = "count", nullable = false)
-	private int count = 1;
+    @Column(name = "count", nullable = false)
+    private int count = 1;
 
-	@Builder
-	private UserReviewLabel(ReviewLabel reviewLabel, User user) {
-		this.reviewLabel = reviewLabel;
-		this.user = user;
-	}
+    @Builder
+    private UserReviewLabel(ReviewLabel reviewLabel, User user) {
+        this.reviewLabel = reviewLabel;
+        this.user = user;
+    }
 
-	public UserReviewLabel(Long id, ReviewLabel reviewLabel) {
-		this.id = id;
-		this.reviewLabel = reviewLabel;
-	}
+    public UserReviewLabel(Long id, ReviewLabel reviewLabel) {
+        this.id = id;
+        this.reviewLabel = reviewLabel;
+    }
 
-	public static UserReviewLabel of(ReviewLabel reviewLabel, User user) {
-		return UserReviewLabel.builder()
-			.reviewLabel(reviewLabel)
-			.user(user)
-			.build();
-	}
+    public static UserReviewLabel of(ReviewLabel reviewLabel, User user) {
+        return UserReviewLabel.builder()
+            .reviewLabel(reviewLabel)
+            .user(user)
+            .build();
+    }
 
-	public void increaseCount() {
-		this.count++;
-	}
+    public void increaseCount() {
+        this.count++;
+    }
 }
