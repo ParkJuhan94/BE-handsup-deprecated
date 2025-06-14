@@ -19,8 +19,6 @@ import dev.handsup.bidding.domain.Bidding;
 import dev.handsup.bidding.dto.BiddingMapper;
 import dev.handsup.bidding.event.BiddingEvent;
 import dev.handsup.bidding.event.BiddingEvent.BiddingEventType;
-import dev.handsup.common.entity.DeadLetterLog;
-import dev.handsup.common.entity.DeadLetterLog.DeadLetterStatus;
 import dev.handsup.common.repository.DeadLetterLogRepository;
 import dev.handsup.common.service.RedisDuplicateChecker;
 import dev.handsup.common.service.SlackNotificationService;
@@ -29,6 +27,8 @@ import dev.handsup.event.consumer.BiddingEventDispatcher;
 import dev.handsup.fixture.AuctionFixture;
 import dev.handsup.fixture.BiddingFixture;
 import dev.handsup.fixture.UserFixture;
+import dev.handsup.kafka.domain.DeadLetterLog;
+import dev.handsup.kafka.domain.DeadLetterLog.DeadLetterStatus;
 import dev.handsup.user.domain.User;
 
 @DisplayName("[Bidding Event Dispatcher 테스트]")
@@ -73,7 +73,7 @@ class BiddingEventDispatcherTest {
             () -> assertEquals("bidding-events", deadLetterLog.getOriginTopic()),
             () -> assertEquals(json, deadLetterLog.getPayload()),
             () -> assertEquals(exceptionClass, deadLetterLog.getExceptionClass()),
-            () -> assertEquals(exceptionMessage, deadLetterLog.getErrorMessage()),
+            () -> assertEquals(exceptionMessage, deadLetterLog.getExceptionMessage()),
             () -> assertEquals(DeadLetterStatus.FAILED, deadLetterLog.getStatus())
         );
     }

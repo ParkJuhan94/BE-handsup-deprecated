@@ -1,5 +1,7 @@
 package dev.handsup.common.service;
 
+import static dev.handsup.common.exception.ExternalServiceErrorCode.*;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +10,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import dev.handsup.common.exception.ExternalServiceException;
 
 @Slf4j
 @Service
@@ -30,7 +34,8 @@ public class SlackNotificationService {
             HttpEntity<String> entity = new HttpEntity<>(payload, headers);
             restTemplate.postForEntity(webhookUrl, entity, String.class);
         } catch (Exception e) {
-            log.error("Slack notifications failed to send: {}", e);
+            log.error("슬램 알림 전송 실패: {}", e);
+            throw new ExternalServiceException(SLACK_SEND_FAILED);
         }
     }
 }

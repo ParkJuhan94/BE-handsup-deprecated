@@ -1,5 +1,7 @@
 package dev.handsup.notification.service;
 
+import static dev.handsup.common.exception.ExternalServiceErrorCode.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,7 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 
-import dev.handsup.common.exception.ValidationException;
+import dev.handsup.common.exception.ExternalServiceException;
 import dev.handsup.notification.domain.NotificationType;
 import dev.handsup.notification.dto.request.SaveFCMTokenRequest;
 import dev.handsup.notification.repository.FCMTokenRepository;
@@ -59,7 +61,7 @@ public class FCMService {
                 "[SEND_MESSAGE_FAILED] reason: {}, senderEmail: {}, senderNickname: {}, receiverEmail: {}, notificationType: {}, auctionId: {}",
                 e.getMessage(), senderEmail, senderNickname, receiverEmail, notificationType.name(), auctionId
             );
-            throw new ValidationException(e.getMessage());
+            throw new ExternalServiceException(FIREBASE_SEND_FAILED);
         }
 
         notificationService.saveNotification(
