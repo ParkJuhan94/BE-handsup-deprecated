@@ -1,5 +1,7 @@
 package dev.handsup.event.consumer;
 
+import static dev.handsup.kafka.exception.KafkaErrorCode.*;
+
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.List;
@@ -10,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.RecoverableDataAccessException;
-import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -23,13 +24,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.handsup.bidding.event.BiddingEvent;
-import dev.handsup.common.entity.DeadLetterLog;
-import dev.handsup.common.entity.DeadLetterLog.DeadLetterStatus;
 import dev.handsup.common.repository.DeadLetterLogRepository;
 import dev.handsup.common.repository.ProcessedEventLogRepository;
 import dev.handsup.common.service.RedisDuplicateChecker;
 import dev.handsup.common.service.SlackNotificationService;
 import dev.handsup.event.common.EventHandler;
+import dev.handsup.kafka.domain.DeadLetterLog;
+import dev.handsup.kafka.exception.KafkaException;
 
 @Slf4j
 @Component
@@ -45,95 +46,77 @@ public class BiddingEventDispatcher {
     private final ObjectMapper objectMapper;
     private final SlackNotificationService slackNotificationService;
 
-    @RetryableTopic(
-        attempts = "4", // 최초 1회 + retry 3회
-        backoff = @Backoff(
-            delay = 2000, // 1초 후 첫 재시도
+    @RetryableTopic(attempts = "4", // 최초 1회 + retry 3회
+        backoff = @Backoff(delay = 2000, // 1초 후 첫 재시도
             multiplier = 2.0, // 이후 2초 → 4초
             maxDelay = 5000 // 최대 5초까지만 delay
-        ),
-        dltTopicSuffix = ".dlt",
-        include = {
-            RuntimeException.class,
-            SocketTimeoutException.class,
-            IOException.class,
-            KafkaException.class,
-            RecoverableDataAccessException.class
-        },
-        timeout = "12000" // 전체 재시도 타임아웃 제한 (12초)
+        ), dltTopicSuffix = ".dlt", include = {RuntimeException.class, SocketTimeoutException.class, IOException.class,
+        org.springframework.kafka.KafkaException.class,
+        RecoverableDataAccessException.class}, timeout = "12000" // 전체 재시도 타임아웃 제한 (12초)
     )
-    @KafkaListener(
-        topics = BIDDING_TOPIC_NAME,
-        groupId = "bidding-consumer-group",
-        containerFactory = "biddingKafkaListenerContainerFactory"
-    )
-    public void listen(
-        @Payload BiddingEvent event,
-        @Header(KafkaHeaders.RECEIVED_TOPIC) String topicName
-    ) {
+    @KafkaListener(topics = BIDDING_TOPIC_NAME, groupId = "bidding-consumer-group", containerFactory = "biddingKafkaListenerContainerFactory")
+    public void listen(@Payload BiddingEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic)
+        throws JsonProcessingException {
         String eventId = event.eventId();
-        boolean isRetry = topicName.contains("-retry-");
+        boolean isRetry = topic.contains("-retry-");
 
         if (eventId == null) {
-            log.warn("Invalid eventId: null");
+            log.warn("eventId가 null 입니다.");
             return;
         }
 
         if (isDuplicate(eventId)) {
             if (isRetry) {
-                log.warn("중복 감지 + 재시도 환경 → DLT 유도");
-                throw new RuntimeException("🔥 강제 실패: 재시도 중 중복 감지");
+                log.warn("[이벤트 중복 + 재시도 환경]: 강제 실패로 DLT 유도. eventId={}", eventId);
+                throw new KafkaException(DUPLICATE_RETRY_EVENT);
             } else {
-                log.warn("중복 이벤트 → 무시. eventId={}", eventId);
+                log.warn("[이벤트 중복]: DLT 유도 하지 않고 무시 처리됨. eventId={}", eventId);
+                deadLetterLogRepository.save(DeadLetterLog.fromDuplicateEvent(topic, event, objectMapper));
+                String truncatedPayload = event.toString();
+                String slackMessage = String.format("""
+                        [⚠️ 이벤트 중복]
+                        • eventId: %s
+                        • DLT 유도 하지 않고 무시 처리됨.
+                        • Topic: %s
+                        • 이벤트 내용:
+                        %s
+                        """, eventId, topic,
+                    truncatedPayload.length() > 500 ? truncatedPayload.substring(0, 500) + "..." : truncatedPayload);
+                slackNotificationService.send(slackMessage);
                 return;
             }
         }
 
-        handlers.stream()
-            .filter(handler -> handler.supports(event))
-            .findFirst()
-            .ifPresentOrElse(
-                handler -> handler.handle(event),
-                () -> log.warn("No matching handler found for BiddingEvent. event={}", event)
-            );
+        handlers.stream().filter(handler -> handler.supports(event)).findFirst().orElseThrow(() -> {
+            log.warn("BiddingEvent를 위한 핸들러가 발견되지 않았습니다. event={}", event);
+            return new KafkaException(UNSUPPORTED_EVENT_TYPE);
+        }).handle(event);
     }
 
-    @KafkaListener(
-        topics = BIDDING_TOPIC_NAME + ".dlt",
-        groupId = "bidding-consumer-group-dlt",
-        containerFactory = "biddingKafkaListenerContainerFactory"
-    )
+    @KafkaListener(topics = BIDDING_TOPIC_NAME
+        + ".dlt", groupId = "bidding-consumer-group-dlt", containerFactory = "biddingKafkaListenerContainerFactory")
     @Transactional
-    public DeadLetterLog handleDLT(
-        @Payload BiddingEvent event,
-        @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+    public DeadLetterLog handleDLT(@Payload BiddingEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
         @Header(name = "x-exception-class", required = false) String exceptionClass,
-        @Header(name = "x-exception-message", required = false) String exceptionMessage
-    ) throws JsonProcessingException {
+        @Header(name = "x-exception-message", required = false) String exceptionMessage)
+        throws JsonProcessingException {
         log.warn("Received message from DLT. event={}", event);
 
         // 1. DB 저장
-        String jsonPayload = objectMapper.writeValueAsString(event);
-
-        DeadLetterLog deadLetterLog = DeadLetterLog.builder()
-            .originTopic(topic.replace(".dlt", ""))
-            .payload(jsonPayload)
-            .errorMessage(exceptionMessage != null ? exceptionMessage : "No message")
-            .exceptionClass(exceptionClass != null ? exceptionClass : "Unknown")
-            .retryCount(0)
-            .status(DeadLetterStatus.FAILED)
-            .build();
-
-        deadLetterLogRepository.save(deadLetterLog);
+        DeadLetterLog deadLetterLog = deadLetterLogRepository.save(
+            DeadLetterLog.fromDLTEvent(topic, event, exceptionClass, exceptionMessage, objectMapper));
 
         // 2. Slack 알림
-        String truncatedPayload = event.toString(); // 필요시 substring 추가
-        String slackMessage = String.format(
-            "[❗DLT 발생]%n➡️ 예외 클래스: %s%n🧨 에러 메시지: %s%n📦 이벤트 데이터:%n%s",
-            exceptionClass,
+        String truncatedPayload = event.toString();
+        String slackMessage = String.format("""
+                [⚠️ DLT 발생]
+                • 예외 클래스: %s
+                • 에러 메시지: %s
+                • 이벤트 요약:
+                %s
+                """, exceptionClass != null ? exceptionClass : "Unknown",
             exceptionMessage != null ? exceptionMessage : "에러 메시지 없음",
-            truncatedPayload.length() > 500 ? truncatedPayload.substring(0, 500) + "..." : truncatedPayload
-        );
+            truncatedPayload.length() > 500 ? truncatedPayload.substring(0, 500) + "..." : truncatedPayload);
         slackNotificationService.send(slackMessage);
 
         // 3. ElasticSearch 로그 저장
