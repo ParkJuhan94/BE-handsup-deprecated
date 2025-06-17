@@ -1,9 +1,9 @@
 package dev.handsup.auction.domain.product;
 
-import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
+import static jakarta.persistence.ConstraintMode.*;
+import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.GenerationType.*;
+import static lombok.AccessLevel.*;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import dev.handsup.common.entity.TimeBaseEntity;
+import dev.handsup.common.domain.TimeBaseEntity;
 
 @Entity
 @Getter

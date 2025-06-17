@@ -1,11 +1,11 @@
 package dev.handsup.auction.domain.product;
 
-import static dev.handsup.common.exception.CommonValidationError.getNotEmptyMessage;
-import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
+import static dev.handsup.common.exception.CommonValidationError.*;
+import static jakarta.persistence.ConstraintMode.*;
+import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.GenerationType.*;
+import static lombok.AccessLevel.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 import dev.handsup.auction.domain.auction_field.PurchaseTime;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
-import dev.handsup.common.entity.TimeBaseEntity;
+import dev.handsup.common.domain.TimeBaseEntity;
 
 @Entity
 @Getter

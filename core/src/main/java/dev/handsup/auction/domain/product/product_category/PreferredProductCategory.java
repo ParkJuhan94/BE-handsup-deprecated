@@ -5,8 +5,6 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import dev.handsup.common.entity.TimeBaseEntity;
-import dev.handsup.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -18,37 +16,41 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import dev.handsup.common.domain.TimeBaseEntity;
+import dev.handsup.user.domain.User;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 public class PreferredProductCategory extends TimeBaseEntity {
-	@Id
-	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "preferred_product_category_id")
-	private Long id;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "user_id",
-		nullable = false,
-		foreignKey = @ForeignKey(NO_CONSTRAINT))
-	private User user;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "preferred_product_category_id")
+    private Long id;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "product_category_id",
-		nullable = false,
-		foreignKey = @ForeignKey(NO_CONSTRAINT))
-	private ProductCategory productCategory;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(NO_CONSTRAINT))
+    private User user;
 
-	@Builder
-	private PreferredProductCategory(User user, ProductCategory productCategory) {
-		this.user = user;
-		this.productCategory = productCategory;
-	}
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "product_category_id",
+        nullable = false,
+        foreignKey = @ForeignKey(NO_CONSTRAINT))
+    private ProductCategory productCategory;
 
-	public static PreferredProductCategory of(User user, ProductCategory productCategory) {
-		return PreferredProductCategory.builder()
-			.user(user)
-			.productCategory(productCategory)
-			.build();
-	}
+    @Builder
+    private PreferredProductCategory(User user, ProductCategory productCategory) {
+        this.user = user;
+        this.productCategory = productCategory;
+    }
+
+    public static PreferredProductCategory of(User user, ProductCategory productCategory) {
+        return PreferredProductCategory.builder()
+            .user(user)
+            .productCategory(productCategory)
+            .build();
+    }
 }
