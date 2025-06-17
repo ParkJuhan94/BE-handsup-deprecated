@@ -54,7 +54,11 @@ public class BiddingEventDispatcher {
         org.springframework.kafka.KafkaException.class,
         RecoverableDataAccessException.class}, timeout = "12000" // 전체 재시도 타임아웃 제한 (12초)
     )
-    @KafkaListener(topics = BIDDING_TOPIC_NAME, groupId = "bidding-consumer-group", containerFactory = "biddingKafkaListenerContainerFactory")
+    @KafkaListener(
+        topics = BIDDING_TOPIC_NAME,
+        groupId = "bidding-consumer-group",
+        containerFactory = "biddingKafkaListenerContainerFactory"
+    )
     public void listen(@Payload BiddingEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic)
         throws JsonProcessingException {
         String eventId = event.eventId();
@@ -87,15 +91,22 @@ public class BiddingEventDispatcher {
             }
         }
 
-        handlers.stream().filter(handler -> handler.supports(event)).findFirst().orElseThrow(() -> {
-            log.warn("BiddingEvent를 위한 핸들러가 발견되지 않았습니다. event={}", event);
-            return new KafkaException(UNSUPPORTED_EVENT_TYPE);
-        }).handle(event);
+        handlers.stream()
+            .filter(handler -> handler.supports(event))
+            .findFirst()
+            .orElseThrow(() -> {
+                log.warn("BiddingEvent를 위한 핸들러가 발견되지 않았습니다. event={}", event);
+                return new KafkaException(UNSUPPORTED_EVENT_TYPE);
+            })
+            .handle(event);
     }
 
-    @KafkaListener(topics = BIDDING_TOPIC_NAME
-        + ".dlt", groupId = "bidding-consumer-group-dlt", containerFactory = "biddingKafkaListenerContainerFactory")
     @Transactional
+    @KafkaListener(
+        topics = BIDDING_TOPIC_NAME + ".dlt",
+        groupId = "bidding-consumer-group-dlt",
+        containerFactory = "biddingKafkaListenerContainerFactory"
+    )
     public DeadLetterLog handleDLT(@Payload BiddingEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
         @Header(name = "x-exception-class", required = false) String exceptionClass,
         @Header(name = "x-exception-message", required = false) String exceptionMessage)
