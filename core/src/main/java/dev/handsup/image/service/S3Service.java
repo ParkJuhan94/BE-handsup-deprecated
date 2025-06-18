@@ -20,64 +20,70 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import dev.handsup.common.exception.ValidationException;
 import dev.handsup.image.exception.ImageErrorCode;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class S3Service {
-	private static final String s3FolderName = "images";
-	private static final List<String> FILE_EXTENSIONS = List.of(".jpg", ".jpeg", ".png", ".JPG",
-		".JPEG", ".PNG", ".webp", ".WEBP");
-	private final AmazonS3 amazonS3;
-	@Value("${cloud.aws.s3.bucket}")
-	private String bucket;
 
-	public List<String> uploadImages(List<MultipartFile> multipartFileList) {
-		ObjectMetadata objectMetadata = new ObjectMetadata();
-		List<String> imageUrls = new ArrayList<>();
+    private static final String S3_FOLDER_NAME = "images";
+    private static final List<String> FILE_EXTENSIONS = List.of(".jpg", ".jpeg", ".png", ".JPG",
+        ".JPEG", ".PNG", ".webp", ".WEBP");
+    private final AmazonS3 amazonS3;
+    private final String bucket;
 
-		for (MultipartFile multipartFile : multipartFileList) {
-			String fileName = createFileName(multipartFile.getOriginalFilename());
-			objectMetadata.setContentLength(multipartFile.getSize());
-			objectMetadata.setContentType(multipartFile.getContentType());
+    public S3Service(
+        AmazonS3 amazonS3,
+        @Value("${cloud.aws.s3.bucket}") String bucket
+    ) {
+        this.amazonS3 = amazonS3;
+        this.bucket = bucket;
+    }
 
-			try (InputStream inputStream = multipartFile.getInputStream()) {
-				amazonS3.putObject(
-					new PutObjectRequest(bucket + "/" + s3FolderName, fileName, inputStream,
-						objectMetadata)
-						.withCannedAcl(CannedAccessControlList.PublicRead)
-				);
-				imageUrls.add(amazonS3.getUrl(bucket + "/" + s3FolderName, fileName).toString());
-			} catch (IOException exception) {
-				throw new ValidationException(ImageErrorCode.FAILED_TO_UPLOAD);
-			}
-		}
-		return imageUrls;
-	}
+    public List<String> uploadImages(List<MultipartFile> multipartFileList) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        List<String> imageUrls = new ArrayList<>();
 
-	public void deleteImages(List<String> imageUrls) {
-		try {
-			imageUrls.forEach(
-				imageUrl -> amazonS3.deleteObject(bucket + "/" + s3FolderName, imageUrl)
-			);
-		} catch (SdkClientException exception) {
-			throw new ValidationException(ImageErrorCode.FAILED_TO_REMOVE);
-		}
-	}
+        for (MultipartFile multipartFile : multipartFileList) {
+            String fileName = createFileName(multipartFile.getOriginalFilename());
+            objectMetadata.setContentLength(multipartFile.getSize());
+            objectMetadata.setContentType(multipartFile.getContentType());
 
-	private String createFileName(String fileName) {
-		return UUID.randomUUID().toString().concat(getFileExtension(fileName));
-	}
+            try (InputStream inputStream = multipartFile.getInputStream()) {
+                amazonS3.putObject(
+                    new PutObjectRequest(bucket + "/" + S3_FOLDER_NAME, fileName, inputStream,
+                        objectMetadata)
+                        .withCannedAcl(CannedAccessControlList.PublicRead)
+                );
+                imageUrls.add(amazonS3.getUrl(bucket + "/" + S3_FOLDER_NAME, fileName).toString());
+            } catch (IOException exception) {
+                throw new ValidationException(ImageErrorCode.FAILED_TO_UPLOAD);
+            }
+        }
+        return imageUrls;
+    }
 
-	private String getFileExtension(String fileName) {
-		if (isNull(fileName) || fileName.isBlank()) {
-			throw new ValidationException(ImageErrorCode.EMPTY_FILE_NAME);
-		}
+    public void deleteImages(List<String> imageUrls) {
+        try {
+            imageUrls.forEach(
+                imageUrl -> amazonS3.deleteObject(bucket + "/" + S3_FOLDER_NAME, imageUrl)
+            );
+        } catch (SdkClientException exception) {
+            throw new ValidationException(ImageErrorCode.FAILED_TO_REMOVE);
+        }
+    }
 
-		String extension = fileName.substring(fileName.lastIndexOf("."));
-		if (!FILE_EXTENSIONS.contains(extension)) {
-			throw new ValidationException(ImageErrorCode.INVALID_FILE_EXTENSION);
-		}
-		return extension;
-	}
+    private String createFileName(String fileName) {
+        return UUID.randomUUID().toString().concat(getFileExtension(fileName));
+    }
+
+    private String getFileExtension(String fileName) {
+        if (isNull(fileName) || fileName.isBlank()) {
+            throw new ValidationException(ImageErrorCode.EMPTY_FILE_NAME);
+        }
+
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        if (!FILE_EXTENSIONS.contains(extension)) {
+            throw new ValidationException(ImageErrorCode.INVALID_FILE_EXTENSION);
+        }
+        return extension;
+    }
 }

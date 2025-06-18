@@ -24,11 +24,16 @@ import dev.handsup.bidding.event.BiddingEvent;
 @ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true")
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.consumer.bootstrap-servers}")
-    private String bootstrapServersConsumer;
+    private final String bootstrapServersConsumer;
+    private final String bootstrapServersAdmin;
 
-    @Value("${spring.kafka.admin.bootstrap-servers}")
-    private String bootstrapServersAdmin;
+    public KafkaConsumerConfig(
+        @Value("${spring.kafka.consumer.bootstrap-servers}") String bootstrapServersConsumer,
+        @Value("${spring.kafka.admin.bootstrap-servers}") String bootstrapServersAdmin
+    ) {
+        this.bootstrapServersConsumer = bootstrapServersConsumer;
+        this.bootstrapServersAdmin = bootstrapServersAdmin;
+    }
 
     @Bean
     public KafkaAdmin kafkaAdmin() {

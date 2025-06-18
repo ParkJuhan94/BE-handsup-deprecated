@@ -20,8 +20,13 @@ import dev.handsup.bidding.event.BiddingEvent;
 @ConditionalOnProperty(name = "event.kafka.enabled", havingValue = "true")
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.producer.bootstrap-servers}")
-    private String bootstrapServers;
+    private final String bootstrapServers;
+
+    public KafkaProducerConfig(
+        @Value("${spring.kafka.producer.bootstrap-servers}") String bootstrapServers
+    ) {
+        this.bootstrapServers = bootstrapServers;
+    }
 
     @Bean
     public ProducerFactory<String, BiddingEvent> producerFactory() {

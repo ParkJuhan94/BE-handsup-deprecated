@@ -5,6 +5,8 @@ import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,33 +17,36 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Configuration
 public class FCMConfig {
 
-	@Value("${fcm.certification}")
-	private String googleApplicationCredentials;
+    private final String googleApplicationCredentials;
 
-	@PostConstruct
-	public void initialize() throws IOException {
-		ClassPathResource resource = new ClassPathResource(googleApplicationCredentials);
+    public FCMConfig(
+        @Value("${fcm.certification}") String googleApplicationCredentials
+    ) {
+        this.googleApplicationCredentials = googleApplicationCredentials;
+    }
 
-		try (InputStream inputStream = resource.getInputStream()) {
-			FirebaseOptions options = FirebaseOptions.builder()
-				.setCredentials(GoogleCredentials.fromStream(inputStream))
-				.build();
+    @PostConstruct
+    public void initialize() throws IOException {
+        ClassPathResource resource = new ClassPathResource(googleApplicationCredentials);
 
-			if (FirebaseApp.getApps().isEmpty()) {
-				FirebaseApp.initializeApp(options);
-				log.info("FirebaseApp initialization complete");
-			}
-		}
-	}
+        try (InputStream inputStream = resource.getInputStream()) {
+            FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(inputStream))
+                .build();
 
-	@Bean
-	public FirebaseMessaging firebaseMessaging() {
-		return FirebaseMessaging.getInstance();
-	}
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+                log.info("FirebaseApp initialization complete");
+            }
+        }
+    }
+
+    @Bean
+    public FirebaseMessaging firebaseMessaging() {
+        return FirebaseMessaging.getInstance();
+    }
 }

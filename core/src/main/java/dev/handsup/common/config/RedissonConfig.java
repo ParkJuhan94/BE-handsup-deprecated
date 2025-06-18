@@ -9,23 +9,29 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RedissonConfig {
-	private static final String REDISSON_HOST_PREFIX = "redis://";
-	@Value("${spring.data.redis.host}")
-	private String host;
-	@Value("${spring.data.redis.port}")
-	private int port;
 
-	@Value("${spring.data.redis.password:}")
-	private String password;
+    private static final String REDISSON_HOST_PREFIX = "redis://";
+    private final String host;
+    private final int port;
+    private final String password;
 
-	@Bean
-	public RedissonClient redissonClient() {
-		Config config = new Config();
-		config.useSingleServer()
-			.setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
-		if (!password.isEmpty()) {
-			config.useSingleServer().setPassword(password);
-		}
-		return Redisson.create(config);
-	}
+    public RedissonConfig(
+        @Value("${spring.data.redis.host}") String host,
+        @Value("${spring.data.redis.port}") int port,
+        @Value("${spring.data.redis.password:}") String password) {
+        this.host = host;
+        this.port = port;
+        this.password = password;
+    }
+
+    @Bean
+    public RedissonClient redissonClient() {
+        Config config = new Config();
+        config.useSingleServer()
+            .setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
+        if (!password.isEmpty()) {
+            config.useSingleServer().setPassword(password);
+        }
+        return Redisson.create(config);
+    }
 }
