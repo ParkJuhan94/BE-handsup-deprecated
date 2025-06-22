@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import dev.handsup.search.dto.PopularKeywordResponse;
+import dev.handsup.search.repository.RedisSearchRepository;
 import dev.handsup.support.TestContainerSupport;
 
 @DisplayName("[RedisSearch Repository 테스트]")

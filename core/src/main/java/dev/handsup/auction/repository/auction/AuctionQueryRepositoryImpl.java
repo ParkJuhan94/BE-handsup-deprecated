@@ -1,9 +1,9 @@
 package dev.handsup.auction.repository.auction;
 
-import static dev.handsup.auction.domain.QAuction.auction;
-import static dev.handsup.auction.domain.product.QProduct.product;
-import static dev.handsup.auction.domain.product.product_category.QProductCategory.productCategory;
-import static org.springframework.util.StringUtils.hasText;
+import static dev.handsup.auction.domain.QAuction.*;
+import static dev.handsup.auction.domain.product.QProduct.*;
+import static dev.handsup.auction.domain.product.product_category.QProductCategory.*;
+import static org.springframework.util.StringUtils.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import dev.handsup.auction.domain.Auction;
@@ -30,10 +29,10 @@ import dev.handsup.auction.domain.product.ProductStatus;
 import dev.handsup.auction.domain.product.QProduct;
 import dev.handsup.auction.domain.product.QProductImage;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
-import dev.handsup.auction.dto.request.AuctionSearchCondition;
 import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.auction.exception.AuctionErrorCode;
 import dev.handsup.common.exception.ValidationException;
+import dev.handsup.search.dto.AuctionSearchRequest;
 
 @Repository
 @RequiredArgsConstructor
@@ -42,22 +41,22 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<Auction> searchAuctions(AuctionSearchCondition condition, Pageable pageable) {
+    public Slice<Auction> searchAuctions(AuctionSearchRequest request, Pageable pageable) {
         List<Auction> content = queryFactory.select(QAuction.auction)
             .from(auction)
             .join(auction.product, product).fetchJoin()
             .leftJoin(product.productCategory, productCategory).fetchJoin()
             .where(
-                keywordContains(condition.keyword()),
-                categoryEq(condition.productCategory()),
-                tradeMethodEq(condition.tradeMethod()),
-                siEq(condition.si()),
-                guEq(condition.gu()),
-                dongEq(condition.dong()),
-                initPriceMin(condition.minPrice()),
-                initPriceMax(condition.maxPrice()),
-                isNewProductEq(condition.isNewProduct()),
-                isProgressEq(condition.isProgress())
+                keywordContains(request.keyword()),
+                categoryEq(request.productCategory()),
+                tradeMethodEq(request.tradeMethod()),
+                siEq(request.si()),
+                guEq(request.gu()),
+                dongEq(request.dong()),
+                initPriceMin(request.minPrice()),
+                initPriceMax(request.maxPrice()),
+                isNewProductEq(request.isNewProduct()),
+                isProgressEq(request.isProgress())
             )
             .orderBy(searchAuctionSort(pageable))
             .limit(pageable.getPageSize() + 1L)
@@ -161,8 +160,7 @@ public class AuctionQueryRepositoryImpl implements AuctionQueryRepository {
                 case "END_DATE" -> auction.endDate.asc();
                 case "BIDDING" -> auction.biddingCount.desc();
                 case "CREATED" -> auction.createdAt.desc();
-                default ->
-                    throw new ValidationException(AuctionErrorCode.INVALID_SORT_INPUT); //기본값 비허용
+                default -> throw new ValidationException(AuctionErrorCode.INVALID_SORT_INPUT); //기본값 비허용
             })
             .orElseThrow();
     }

@@ -7,12 +7,12 @@ import org.springframework.data.domain.Slice;
 
 import dev.handsup.auction.domain.Auction;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
-import dev.handsup.auction.dto.request.AuctionSearchCondition;
 import dev.handsup.auction.dto.response.RecommendAuctionResponse;
+import dev.handsup.search.dto.AuctionSearchRequest;
 
 public interface AuctionQueryRepository {
 
-    Slice<Auction> searchAuctions(AuctionSearchCondition auctionSearchCondition, Pageable pageable);
+    Slice<Auction> searchAuctions(AuctionSearchRequest auctionSearchRequest, Pageable pageable);
 
     Slice<RecommendAuctionResponse> sortAuctionByCriteria(String si, String gu, String dong,
         Pageable pageable);

@@ -19,17 +19,22 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import dev.handsup.auction.domain.Auction;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
-import dev.handsup.auction.dto.request.AuctionSearchCondition;
 import dev.handsup.auction.repository.auction.AuctionRepository;
 import dev.handsup.auction.repository.product.ProductCategoryRepository;
-import dev.handsup.auction.repository.search.RedisSearchRepository;
 import dev.handsup.common.support.ApiTestSupport;
 import dev.handsup.fixture.AuctionFixture;
 import dev.handsup.fixture.ProductFixture;
+import dev.handsup.search.dto.AuctionSearchRequest;
+import dev.handsup.search.repository.RedisSearchRepository;
 
+<<<<<<<< HEAD:api/src/test/java/dev/handsup/search/SearchControllerTest.java
 @Tag("integration")
 @DisplayName("[검색 API 통합 테스트]")
 class SearchControllerTest extends ApiTestSupport {
+========
+@DisplayName("[경매 검색 API 통합 테스트]")
+class AuctionSearchApiControllerTest extends ApiTestSupport {
+>>>>>>>> 1226de9 (style: 네이밍 변경 AuctionSearchCondition --> AuctionSearchRequest & Search 관련 파일들을 Auction 디렉토리에서 Search 디렉토리로 이동 (#84)):api/src/test/java/dev/handsup/search/AuctionSearchApiControllerTest.java
 
     private static final String DIGITAL_DEVICE = "디지털 기기";
     private ProductCategory productCategory;
@@ -64,13 +69,13 @@ class SearchControllerTest extends ApiTestSupport {
         Auction auction1 = AuctionFixture.auction(productCategory, "버즈 이어폰 팔아요");
         Auction auction2 = AuctionFixture.auction(productCategory, "에버어즈팟");
         Auction auction3 = AuctionFixture.auction(productCategory, "버즈 이어폰 팔아요");
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword("버즈").build();
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
 
         mockMvc.perform(post("/api/auctions/search")
                 .contentType(APPLICATION_JSON)
-                .content(toJson(condition)))
+                .content(toJson(request)))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content[0].title").value(auction1.getTitle()))
@@ -91,11 +96,11 @@ class SearchControllerTest extends ApiTestSupport {
         ReflectionTestUtils.setField(auction2, "bookmarkCount", 5);
         ReflectionTestUtils.setField(auction3, "bookmarkCount", 3);
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword("버즈").build();
 
         mockMvc.perform(post("/api/auctions/search")
-                .content(toJson(condition))
+                .content(toJson(request))
                 .contentType(APPLICATION_JSON)
                 .param("sort", "BOOKMARK"))
             .andDo(MockMvcResultHandlers.print())
@@ -115,14 +120,14 @@ class SearchControllerTest extends ApiTestSupport {
         ReflectionTestUtils.setField(auction2, "bookmarkCount", 5);
         ReflectionTestUtils.setField(auction3, "bookmarkCount", 3);
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword("버즈")
             .minPrice(10000)
             .maxPrice(20000)
             .build();
 
         mockMvc.perform(post("/api/auctions/search")
-                .content(toJson(condition))
+                .content(toJson(request))
                 .contentType(APPLICATION_JSON))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())

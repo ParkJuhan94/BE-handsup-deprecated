@@ -1,4 +1,4 @@
-package dev.handsup.search;
+package dev.handsup.search.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,38 +15,38 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import dev.handsup.auction.dto.request.AuctionSearchCondition;
 import dev.handsup.auction.dto.response.AuctionSimpleResponse;
 import dev.handsup.auth.annotation.NoAuth;
 import dev.handsup.common.dto.PageResponse;
-import dev.handsup.search.dto.PopularKeywordsResponse;
-import dev.handsup.search.service.SearchService;
+import dev.handsup.search.dto.AuctionSearchRequest;
+import dev.handsup.search.dto.PopularAuctionKeywordsResponse;
+import dev.handsup.search.service.AuctionSearchService;
 
-@Tag(name = "검색 API")
+@Tag(name = "경매 검색 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auctions/search")
-public class SearchController {
+public class AuctionSearchApiController {
 
-    private final SearchService searchService;
+    private final AuctionSearchService auctionSearchService;
 
     @NoAuth
     @Operation(summary = "경매 검색 API", description = "경매를 검색한다")
     @ApiResponse(useReturnTypeSchema = true)
     @PostMapping
     public ResponseEntity<PageResponse<AuctionSimpleResponse>> searchAuctions(
-        @Valid @RequestBody AuctionSearchCondition condition,
+        @Valid @RequestBody AuctionSearchRequest request,
         Pageable pageable) {
-        PageResponse<AuctionSimpleResponse> response = searchService.searchAuctions(condition, pageable);
+        PageResponse<AuctionSimpleResponse> response = auctionSearchService.searchAuctions(request, pageable);
         return ResponseEntity.ok(response);
     }
 
     @NoAuth
-    @Operation(summary = "인기 검색어 조회 API", description = "인기 검색어를 조회한다.")
+    @Operation(summary = "인기 경매 검색어 조회 API", description = "인기 경매 검색어를 조회한다.")
     @ApiResponse(useReturnTypeSchema = true)
     @GetMapping("/popular")
-    public ResponseEntity<PopularKeywordsResponse> getPopularKeywords() {
-        PopularKeywordsResponse response = searchService.getPopularKeywords();
+    public ResponseEntity<PopularAuctionKeywordsResponse> getPopularAuctionKeywords() {
+        PopularAuctionKeywordsResponse response = auctionSearchService.getPopularAuctionKeywords();
         return ResponseEntity.ok(response);
     }
 }

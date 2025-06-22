@@ -1,7 +1,7 @@
 package dev.handsup.auction.repository.auction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,20 +22,20 @@ import dev.handsup.auction.domain.auction_field.AuctionStatus;
 import dev.handsup.auction.domain.auction_field.TradeMethod;
 import dev.handsup.auction.domain.product.ProductStatus;
 import dev.handsup.auction.domain.product.product_category.ProductCategory;
-import dev.handsup.auction.dto.request.AuctionSearchCondition;
 import dev.handsup.auction.dto.response.RecommendAuctionResponse;
 import dev.handsup.auction.repository.product.ProductCategoryRepository;
 import dev.handsup.common.support.DataJpaTestSupport;
 import dev.handsup.fixture.AuctionFixture;
 import dev.handsup.fixture.ProductFixture;
+import dev.handsup.search.dto.AuctionSearchRequest;
 
 @DisplayName("[AuctionQueryRepositoryImpl 테스트]")
 class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
 
-    private final String DIGITAL_DEVICE = "디지털 기기";
-    private final String APPLIANCE = "가전제품";
+    private static final String DIGITAL_DEVICE = "디지털 기기";
+    private static final String APPLIANCE = "가전제품";
 
-    private final String KEYWORD = "버즈";
+    private static final String KEYWORD = "버즈";
     private final PageRequest pageRequest = PageRequest.of(0, 10);
     private ProductCategory category1;
     private ProductCategory category2;
@@ -68,13 +68,13 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
 
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .minPrice(5000)
             .build();
 
         //when
-        List<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest)
+        List<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest)
             .getContent();
 
         //then
@@ -94,13 +94,13 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
 
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .maxPrice(5000)
             .build();
 
         //when
-        List<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest)
+        List<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest)
             .getContent();
 
         //then
@@ -119,13 +119,13 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         Auction auction3 = AuctionFixture.auction(category2, ProductStatus.CLEAN);
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .isNewProduct(false)
             .build();
 
         //when
-        List<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest)
+        List<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest)
             .getContent();
 
         //then
@@ -145,13 +145,13 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         auction1.updateAuctionStatusTrading();
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .isProgress(true)
             .build();
 
         //when
-        List<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest)
+        List<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest)
             .getContent();
 
         //then
@@ -169,13 +169,13 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         Auction auction2 = AuctionFixture.auction(category2, TradeMethod.DIRECT);
         auctionRepository.saveAll(List.of(auction1, auction2));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .tradeMethod("택배")
             .build();
 
         //when
-        List<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest)
+        List<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest)
             .getContent();
 
         //then
@@ -194,12 +194,12 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         Auction auction3 = AuctionFixture.auction(category2, "버즈팔아요");
         auctionRepository.saveAll(List.of(auction1, auction2, auction3));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .productCategory(DIGITAL_DEVICE)
             .build();
         //when
-        List<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest)
+        List<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest)
             .getContent();
 
         //then
@@ -217,7 +217,7 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         Auction auction2 = AuctionFixture.auction(category1);
         auctionRepository.saveAll(List.of(auction1, auction2));
 
-        AuctionSearchCondition condition = AuctionSearchCondition.builder()
+        AuctionSearchRequest request = AuctionSearchRequest.builder()
             .keyword(KEYWORD)
             .si("서울시")
             .productCategory(DIGITAL_DEVICE)
@@ -225,7 +225,7 @@ class AuctionQueryRepositoryImplTest extends DataJpaTestSupport {
         PageRequest pageRequest1 = PageRequest.of(0, 1);
 
         //when
-        Slice<Auction> auctions = auctionQueryRepository.searchAuctions(condition, pageRequest1);
+        Slice<Auction> auctions = auctionQueryRepository.searchAuctions(request, pageRequest1);
 
         //then
         assertThat(auctions.hasNext()).isTrue();
