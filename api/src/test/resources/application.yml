@@ -42,4 +42,8 @@ fcm:
 
 notification:
   slack:
-    webhook-url: https://hooks.slack.com/services/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
+    webhook-url: https://hooks.slack.com/test
+
+openai:
+  api:
+    key: sk-proj-test
