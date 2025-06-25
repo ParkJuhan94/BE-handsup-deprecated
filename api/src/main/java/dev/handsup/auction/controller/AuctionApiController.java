@@ -1,5 +1,7 @@
 package dev.handsup.auction.controller;
 
+import java.util.Map;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,7 @@ import dev.handsup.auction.service.AuctionService;
 import dev.handsup.auth.annotation.NoAuth;
 import dev.handsup.auth.jwt.JwtAuthorization;
 import dev.handsup.common.dto.PageResponse;
+import dev.handsup.openai.service.OpenAiCompletionService;
 import dev.handsup.user.domain.User;
 
 @Tag(name = "경매 API")
@@ -37,6 +40,7 @@ public class AuctionApiController {
 
     private final AuctionService auctionService;
     private final AuctionCacheService auctionCacheService;
+    private final OpenAiCompletionService openAiCompletionService;
 
     @NoAuth
     @Operation(summary = "경매 등록 API", description = "경매를 등록한다")
@@ -93,6 +97,14 @@ public class AuctionApiController {
             user,
             pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @NoAuth
+    @PostMapping("/ai-description")
+    public ResponseEntity<String> createDescription(@RequestBody Map<String, String> request) {
+        String shortDesc = request.get("input");
+        String aiDesc = openAiCompletionService.generateDescription(shortDesc);
+        return ResponseEntity.ok(aiDesc);
     }
 
 }
