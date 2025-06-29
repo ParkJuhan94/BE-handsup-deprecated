@@ -10,8 +10,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import dev.handsup.auth.jwt.JwtAuthorizationArgumentResolver;
-import dev.handsup.auth.jwt.JwtInterceptor;
+import dev.handsup.auth.web.JwtAuthorizationArgumentResolver;
+import dev.handsup.auth.web.JwtInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
