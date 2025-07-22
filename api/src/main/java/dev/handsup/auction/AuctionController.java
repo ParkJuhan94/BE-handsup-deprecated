@@ -42,6 +42,7 @@ public class AuctionController {
     private final AuctionCacheService auctionCacheService;
     private final OpenAiCompletionService openAiCompletionService;
 
+    // TODO: @NoAuth, @JwtAuthrization 로직 다시 이해하기
     @NoAuth
     @Operation(summary = "경매 등록 API", description = "경매를 등록한다")
     @ApiResponse(useReturnTypeSchema = true)

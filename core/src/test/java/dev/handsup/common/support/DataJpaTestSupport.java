@@ -19,4 +19,5 @@ import dev.handsup.support.TestContainerSupport;
 @AutoConfigureTestDatabase(replace = NONE)
 @ExtendWith(DatabaseCleanerExtension.class)
 public abstract class DataJpaTestSupport extends TestContainerSupport {
+
 }
