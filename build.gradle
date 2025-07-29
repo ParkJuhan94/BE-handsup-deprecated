@@ -35,7 +35,7 @@ subprojects {
     }
 
     tasks.named('bootJar') {
-        enabled = false     //루트에서는 스프링부트가 필요하지 않음; 실제 플러그인은 서브 프로젝트에서 명시적 적용
+        enabled = false     // 루트에서는 스프링부트가 필요하지 않음. 실제 플러그인은 서브 프로젝트에서 명시적 적용
     }
 
     tasks.named('jar') {
@@ -53,11 +53,6 @@ subprojects {
         jacoco {
             toolVersion = "0.8.13"
             reportsDirectory = layout.buildDirectory.dir('jacocoReport')
-        }
-
-        test {
-            useJUnitPlatform()
-//            finalizedBy jacocoTestReport    // test 실행 후 report 생성
         }
 
         jacocoTestReport {
@@ -89,7 +84,7 @@ subprojects {
                     ])
                 }))
             }
-            finalizedBy 'jacocoTestCoverageVerification'    // 이후에 jacocoTestCoverageVerification 실행되도록
+            finalizedBy 'jacocoTestCoverageVerification'
         }
 
         jacocoTestCoverageVerification {
