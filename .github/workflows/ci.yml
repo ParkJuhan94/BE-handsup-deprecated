@@ -99,6 +99,7 @@ jobs:
 
   pr-comment:
     needs: build
+    runs-on: ubuntu-latest
     steps:
       # 8. 테스트 결과 PR 코멘트에 등록
       - name: Register the test results as PR comments
@@ -116,6 +117,7 @@ jobs:
 
   test-coverage:
     needs: build
+    runs-on: ubuntu-latest
     steps:
       # 10. JaCoCo 리포트 생성
       - name: Generate JaCoCo Report
