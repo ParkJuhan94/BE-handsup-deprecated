@@ -85,6 +85,7 @@ jobs:
 
       # 6. 빌드 시 의존성 캐싱
       - name: Caching gradle
+        if: always()
         uses: actions/cache@v4
         with:
           path: |
@@ -98,10 +99,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --build-cache --parallel
 
-  pr-comment:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       # 8. 테스트 결과 PR 코멘트에 등록
       - name: Register the test results as PR comments
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -116,10 +113,6 @@ jobs:
         with:
           report_paths: '**/build/test-results/test/TEST-*.html'
 
-  test-coverage:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout source code
         uses: actions/checkout@v3
 
