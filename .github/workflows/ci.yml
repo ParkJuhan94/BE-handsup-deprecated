@@ -95,9 +95,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 7. 빌드
+      # 7. 빌드 & JaCoCo 리포트 생성
       - name: Build with Gradle
-        run: ./gradlew build --build-cache --parallel
+        run: ./gradlew build jacocoTestReport --build-cache --parallel
 
       # 8. 테스트 결과 PR 코멘트에 등록
       - name: Register the test results as PR comments
@@ -116,11 +116,11 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v3
 
-      # 10. JaCoCo 리포트 생성
-      - name: Generate JaCoCo Report
-        run: ./gradlew test jacocoTestReport
+      #      # 10. JaCoCo 리포트 생성
+      #      - name: Generate JaCoCo Report
+      #        run: ./gradlew test jacocoTestReport
 
-      # 11. Codecov 업로드
+      # 10. Codecov 업로드
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
