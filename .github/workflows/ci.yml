@@ -118,7 +118,7 @@ jobs:
 
       # 10. JaCoCo 리포트 생성
       - name: Generate JaCoCo Report
-        run: ./gradlew jacocoTestReport
+        run: ./gradlew test jacocoTestReport
 
       # 11. Codecov 업로드
       - name: Upload coverage to Codecov
