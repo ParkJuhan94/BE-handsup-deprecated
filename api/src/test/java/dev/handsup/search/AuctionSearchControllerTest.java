@@ -10,7 +10,6 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,14 +26,8 @@ import dev.handsup.fixture.ProductFixture;
 import dev.handsup.search.dto.AuctionSearchRequest;
 import dev.handsup.search.repository.RedisSearchRepository;
 
-<<<<<<<< HEAD:api/src/test/java/dev/handsup/search/SearchControllerTest.java
-@Tag("integration")
-@DisplayName("[검색 API 통합 테스트]")
-class SearchControllerTest extends ApiTestSupport {
-========
 @DisplayName("[경매 검색 API 통합 테스트]")
-class AuctionSearchApiControllerTest extends ApiTestSupport {
->>>>>>>> 1226de9 (style: 네이밍 변경 AuctionSearchCondition --> AuctionSearchRequest & Search 관련 파일들을 Auction 디렉토리에서 Search 디렉토리로 이동 (#84)):api/src/test/java/dev/handsup/search/AuctionSearchApiControllerTest.java
+class AuctionSearchControllerTest extends ApiTestSupport {
 
     private static final String DIGITAL_DEVICE = "디지털 기기";
     private ProductCategory productCategory;

@@ -1,4 +1,4 @@
-package dev.handsup.search.controller;
+package dev.handsup.search;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import dev.handsup.search.service.AuctionSearchService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auctions/search")
-public class AuctionSearchApiController {
+public class AuctionSearchController {
 
     private final AuctionSearchService auctionSearchService;
 
